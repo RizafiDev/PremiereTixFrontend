@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import axios from "axios";
 import {
   EyeIcon as Eye,
   EyeSlashIcon as EyeSlash,
@@ -8,30 +9,125 @@ import {
 
 function Register() {
   const [showPassword, setShowPassword] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+  const [errorMessage, setErrorMessage] = useState("");
+  const [formData, setFormData] = useState({
+    name: "",
+    email: "",
+    password: "",
+    confirmPassword: "",
+  });
 
   const togglePasswordVisibility = () => {
     setShowPassword(!showPassword);
   };
 
   const navigate = useNavigate();
+
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = e.target;
+    setFormData({
+      ...formData,
+      [name]: value,
+    });
+  };
+
+  const validateForm = () => {
+    const { name, email, password, confirmPassword } = formData;
+
+    if (!name || !email || !password || !confirmPassword) {
+      setErrorMessage("Semua field harus diisi.");
+      return false;
+    }
+
+    if (password !== confirmPassword) {
+      setErrorMessage("Password dan konfirmasi password tidak cocok.");
+      return false;
+    }
+
+    if (password.length < 6) {
+      setErrorMessage("Password harus memiliki minimal 6 karakter.");
+      return false;
+    }
+
+    setErrorMessage("");
+    return true;
+  };
+
+  const generateRememberToken = () => {
+    // Generate token acak menggunakan Math.random dan Date.now
+    return Math.random().toString(36).substring(2) + Date.now().toString(36);
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+
+    if (!validateForm()) return;
+
+    setIsLoading(true);
+    setErrorMessage("");
+
+    try {
+      // Generate remember_token
+      const rememberToken = generateRememberToken();
+
+      // Data yang akan dikirim ke API
+      const payload = {
+        name: formData.name,
+        email: formData.email,
+        password: formData.password,
+        remember_token: rememberToken, // Tambahkan remember_token
+      };
+
+      // Kirim data ke API menggunakan axios
+      const response = await axios.post(
+        "http://127.0.0.1:8000/api/dashboard/app-users",
+        payload,
+        {
+          headers: {
+            "Content-Type": "application/json",
+            Accept: "application/json",
+          },
+        }
+      );
+
+      // Jika registrasi berhasil, navigasi ke halaman login
+      if (response.status === 200 || response.status === 201) {
+        navigate("/login");
+      }
+    } catch (error: any) {
+      setErrorMessage(
+        error.response?.data?.message ||
+          "Terjadi kesalahan saat mendaftar. Silakan coba lagi."
+      );
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   return (
     <section className="container w-full h-screen flex flex-col justify-center items-center bg-gray-50">
       <form
-        action=""
+        onSubmit={handleSubmit}
         className="max-w-[360px] w-full space-y-5 border border-gray-300 bg-white p-7 shadow-xs rounded-md"
       >
         <div className="header">
           <h1 className="font-semibold text-2xl">Daftar</h1>
           <p className="font-medium text-xs">Pastikan data yang diisi benar</p>
+          {errorMessage && (
+            <div className="text-red-500 text-xs mt-2">{errorMessage}</div>
+          )}
         </div>
-        <div className="username flex flex-col space-y-2">
-          <label htmlFor="username" className="text-xs font-medium">
+        <div className="name flex flex-col space-y-2">
+          <label htmlFor="name" className="text-xs font-medium">
             Nama Pengguna
           </label>
           <input
             type="text"
-            name="username"
+            name="name"
             placeholder="Rizafi"
+            value={formData.name}
+            onChange={handleInputChange}
             className="outline-none pt-1.5 placeholder:font-normal font-medium text-sm pb-2 px-3 rounded-sm border border-gray-300 focus:outline-2 focus:border-cusprimary transition-all"
           />
         </div>
@@ -43,6 +139,8 @@ function Register() {
             type="email"
             name="email"
             placeholder="example@gmail.com"
+            value={formData.email}
+            onChange={handleInputChange}
             className="outline-none pt-1.5 placeholder:font-normal font-medium text-sm pb-2 px-3 rounded-sm border border-gray-300 focus:outline-2 focus:border-cusprimary transition-all"
           />
         </div>
@@ -54,11 +152,13 @@ function Register() {
             type={showPassword ? "text" : "password"}
             name="password"
             placeholder="••••"
+            value={formData.password}
+            onChange={handleInputChange}
             className="outline-none placeholder:font-normal font-medium pt-1.5 text-sm pb-2 px-3 rounded-sm border border-gray-300 focus:outline-2 focus:border-cusprimary transition-all"
           />
           {showPassword ? (
             <EyeSlash
-              className="w-5 h-5 text-gray-400 absolute right-3 bottom-4  cursor-pointer transition-all duration-75"
+              className="w-5 h-5 text-gray-400 absolute right-3 bottom-4 cursor-pointer transition-all duration-75"
               onClick={togglePasswordVisibility}
             />
           ) : (
@@ -69,18 +169,20 @@ function Register() {
           )}
         </div>
         <div className="password flex flex-col space-y-2 relative">
-          <label htmlFor="password" className="text-xs font-medium">
+          <label htmlFor="confirmPassword" className="text-xs font-medium">
             Konfirmasi Password
           </label>
           <input
             type={showPassword ? "text" : "password"}
-            name="password"
+            name="confirmPassword"
             placeholder="••••"
+            value={formData.confirmPassword}
+            onChange={handleInputChange}
             className="outline-none placeholder:font-normal font-medium pt-1.5 text-sm pb-2 px-3 rounded-sm border border-gray-300 focus:outline-2 focus:border-cusprimary transition-all"
           />
           {showPassword ? (
             <EyeSlash
-              className="w-5 h-5 text-gray-400 absolute right-3 bottom-4  cursor-pointer transition-all duration-75"
+              className="w-5 h-5 text-gray-400 absolute right-3 bottom-4 cursor-pointer transition-all duration-75"
               onClick={togglePasswordVisibility}
             />
           ) : (
@@ -90,8 +192,16 @@ function Register() {
             />
           )}
         </div>
-        <button className="bg-blue-600 hover:bg-blue-700 transition-all cursor-pointer text-white text-xs font-medium py-2.5 rounded-sm w-full">
-          Masuk
+        <button
+          type="submit"
+          disabled={isLoading}
+          className="bg-blue-600 hover:bg-blue-700 transition-all cursor-pointer text-white text-xs font-medium py-2.5 rounded-sm w-full flex items-center justify-center"
+        >
+          {isLoading ? (
+            <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
+          ) : (
+            "Daftar"
+          )}
         </button>
         <p className="text-xs text-gray-600 font-medium text-center">
           Sudah memiliki akun??{" "}
@@ -113,4 +223,5 @@ function Register() {
     </section>
   );
 }
+
 export default Register;
