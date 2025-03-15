@@ -12,12 +12,20 @@ function Navbar() {
   // Cek status login saat komponen di-render
   useEffect(() => {
     const token = localStorage.getItem("token");
-    setIsLoggedIn(!!token); // Set status login berdasarkan token
+    const user = localStorage.getItem("user");
+
+    // Periksa apakah token dan user ada
+    if (token && user) {
+      setIsLoggedIn(true);
+    } else {
+      setIsLoggedIn(false);
+    }
 
     // Tambahkan event listener untuk mendeteksi perubahan di localStorage
     const handleStorageChange = () => {
       const token = localStorage.getItem("token");
-      setIsLoggedIn(!!token);
+      const user = localStorage.getItem("user");
+      setIsLoggedIn(!!token && !!user);
     };
 
     window.addEventListener("storage", handleStorageChange);
@@ -33,7 +41,7 @@ function Navbar() {
     localStorage.removeItem("user"); // Hapus data user
     setIsLoggedIn(false); // Perbarui status login
     window.dispatchEvent(new Event("storage")); // Trigger event untuk memperbarui komponen lain
-    navigate("/login"); // Arahkan ke login
+    navigate("/"); // Arahkan ke login
   };
 
   return (

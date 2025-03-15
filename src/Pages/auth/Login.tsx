@@ -77,16 +77,13 @@ function Login() {
 
       // Jika login berhasil, simpan remember_token dan navigasi ke dashboard
       if (response.status === 200 || response.status === 201) {
-        const { remember_token } = response.data;
+        const { token, user } = response.data;
 
-        // Simpan remember_token di localStorage jika "Ingat saya" dicentang
-        if (formData.remember) {
-          localStorage.setItem("remember_token", remember_token);
-        } else {
-          sessionStorage.setItem("remember_token", remember_token);
-        }
+        // Simpan token dan data user di localStorage
+        localStorage.setItem("token", token);
+        localStorage.setItem("user", JSON.stringify(user));
 
-        // Navigasi ke halaman dashboard atau halaman lain
+        // Navigasi ke halaman utama
         navigate("/");
       }
     } catch (error: any) {

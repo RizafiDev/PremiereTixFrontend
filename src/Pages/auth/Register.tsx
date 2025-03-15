@@ -93,7 +93,14 @@ function Register() {
 
       // Jika registrasi berhasil, navigasi ke halaman login
       if (response.status === 200 || response.status === 201) {
-        navigate("/login");
+        const { token, user } = response.data;
+
+        // Simpan token dan data user di localStorage
+        localStorage.setItem("token", token);
+        localStorage.setItem("user", JSON.stringify(user));
+
+        // Navigasi ke halaman utama
+        navigate("/");
       }
     } catch (error: any) {
       setErrorMessage(
