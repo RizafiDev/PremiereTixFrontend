@@ -100,7 +100,7 @@ function Register() {
         localStorage.setItem("user", JSON.stringify(user));
 
         // Navigasi ke halaman utama
-        navigate("/");
+        navigate("/login");
       }
     } catch (error: any) {
       setErrorMessage(
