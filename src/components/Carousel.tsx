@@ -5,42 +5,38 @@ interface CarouselProps {
 }
 
 const Carousel: React.FC<CarouselProps> = ({ images }) => {
-  const carouselRef = useRef<HTMLDivElement>(null);
   const [activeIndex, setActiveIndex] = useState(0);
+  const [translateX, setTranslateX] = useState(0);
+  const intervalRef = useRef<NodeJS.Timeout | null>(null);
 
   useEffect(() => {
-    const interval = setInterval(() => {
-      if (carouselRef.current) {
-        const nextIndex = (activeIndex + 1) % images.length;
-        setActiveIndex(nextIndex);
-        const nextSlide = carouselRef.current.children[
-          nextIndex
-        ] as HTMLElement;
-        nextSlide?.scrollIntoView({ behavior: "smooth" });
-      }
-    }, 3000); // Ganti slide setiap 3 detik
+    intervalRef.current = setInterval(() => {
+      setActiveIndex((prevIndex) => (prevIndex + 1) % images.length);
+    }, 3000); // Auto-slide setiap 3 detik
 
-    return () => clearInterval(interval);
-  }, [activeIndex, images.length]);
+    return () => {
+      if (intervalRef.current) clearInterval(intervalRef.current);
+    };
+  }, [images.length]);
+
+  useEffect(() => {
+    setTranslateX(-activeIndex * 100);
+  }, [activeIndex]);
 
   return (
-    <div className="relative w-full overflow-hidden">
-      {/* Carousel Container */}
-      <div ref={carouselRef} className="flex w-full overflow-hidden">
+    <div className="relative w-full aspect-[320/123] overflow-hidden">
+      {/* Container Carousel */}
+      <div
+        className="flex w-full h-full transition-transform duration-500 ease-in-out"
+        style={{ transform: `translateX(${translateX}%)` }} // Perubahan slide
+      >
         {images.map((image, index) => (
-          <div key={index} className="relative flex-none w-full">
-            {/* Gambar */}
+          <div key={index} className="flex-none w-full h-full">
             <img
               src={image.src}
               alt={`Slide ${index}`}
-              className="w-full h-[500px] object-cover"
+              className="w-full h-full object-cover"
             />
-
-            {/* Layer Informasi */}
-            <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/70 to-transparent p-6 text-white transition-opacity duration-500">
-              <h2 className="text-2xl font-bold">{image.title}</h2>
-              <p className="text-sm">{image.rating}</p>
-            </div>
           </div>
         ))}
       </div>
@@ -50,7 +46,7 @@ const Carousel: React.FC<CarouselProps> = ({ images }) => {
         {images.map((_, index) => (
           <div
             key={index}
-            className={`w-1 h-1 rounded-full transition-all duration-300 ${
+            className={`w-2 h-2 rounded-full transition-all duration-300 ${
               index === activeIndex ? "bg-white scale-125" : "bg-gray-400"
             }`}
           />

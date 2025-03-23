@@ -4,6 +4,7 @@ import { ArrowRightEndOnRectangleIcon as MasukIcon } from "@heroicons/react/24/o
 import { UserPlusIcon as DaftarIcon } from "@heroicons/react/24/outline";
 import Logo from "../../public/Premiere.svg";
 import { ArrowRightStartOnRectangleIcon as LogoutIcon } from "@heroicons/react/24/outline";
+import { QuestionMarkCircleIcon as HelpIcon } from "@heroicons/react/24/outline";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -23,14 +24,6 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from "@/components/ui/dialog";
 import SelectRegion from "./custom/selectRegion";
 import SearchTab from "./custom/searchTab";
 import Avatar from "./custom/avatar";
@@ -86,7 +79,7 @@ function Navbar() {
   };
 
   return (
-    <nav className="container fixed z-50 backdrop-blur-xl backdrop-brightness-50 shadow-sm bg-white flex items-center w-full mx-auto my-auto justify-between pl-5 pr-7">
+    <nav className="container  z-50 backdrop-blur-xl backdrop-brightness-50 shadow-sm bg-white flex items-center w-full mx-auto my-auto justify-between pl-5 pr-7">
       <div className="brand">
         <img src={Logo} alt="" className="w-36" />
       </div>
@@ -174,6 +167,7 @@ function Navbar() {
             </button>
           </>
         )}
+        <HelpIcon className="w-6 h-6 text-black cursor-pointer" />
       </div>
     </nav>
   );
