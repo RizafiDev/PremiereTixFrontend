@@ -39,16 +39,14 @@ function Navbar() {
     const token = localStorage.getItem("token");
     const user = localStorage.getItem("user");
 
-    // Periksa apakah token dan user ada
     if (token && user) {
       setIsLoggedIn(true);
-      setUserName(JSON.parse(user).name); // Parse user data and set userName
+      setUserName(JSON.parse(user).name);
       setUserEmail(JSON.parse(user).email);
     } else {
       setIsLoggedIn(false);
     }
 
-    // Tambahkan event listener untuk mendeteksi perubahan di localStorage
     const handleStorageChange = () => {
       const token = localStorage.getItem("token");
       const user = localStorage.getItem("user");
@@ -64,7 +62,6 @@ function Navbar() {
 
     window.addEventListener("storage", handleStorageChange);
 
-    // Bersihkan event listener saat komponen di-unmount
     return () => {
       window.removeEventListener("storage", handleStorageChange);
     };

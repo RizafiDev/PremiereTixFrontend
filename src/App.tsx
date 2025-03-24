@@ -3,6 +3,7 @@ import Homepage from "./Pages/Homepage";
 import Notfound from "./Pages/Notfound";
 import Login from "./Pages/auth/Login";
 import Register from "./Pages/auth/Register";
+import SelectChair from "./Pages/transaction/SelectChair";
 
 function App() {
   return (
@@ -14,6 +15,8 @@ function App() {
         {/* authentication */}
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
+        {/* transaction */}
+        <Route path="/chair" element={<SelectChair />} />
       </Routes>
     </Router>
   );

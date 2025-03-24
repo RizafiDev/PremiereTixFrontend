@@ -3,7 +3,7 @@ import FilmList from "@/components/custom/FilmList";
 
 function PlayingFilm() {
   return (
-    <div className="container mx-auto px-8 py-10 shadow-sm bg-white">
+    <div className="container mx-auto px-16 py-10 shadow-sm bg-white flex flex-col  gap-8">
       <div className="heading flex justify-between items-center">
         <div className="left flex flex-col items-start space-y-3">
           <h1 className="text-2xl font-bold">Sedang Tayang</h1>
