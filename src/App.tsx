@@ -4,6 +4,7 @@ import Notfound from "./Pages/Notfound";
 import Login from "./Pages/auth/Login";
 import Register from "./Pages/auth/Register";
 import SelectChair from "./Pages/transaction/SelectChair";
+import BuyTicket from "./Pages/transaction/films/BuyTicket";
 
 function App() {
   return (
@@ -16,7 +17,9 @@ function App() {
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
         {/* transaction */}
+        {/* films transactions */}
         <Route path="/chair" element={<SelectChair />} />
+        <Route path="/buy" element={<BuyTicket />} />
       </Routes>
     </Router>
   );

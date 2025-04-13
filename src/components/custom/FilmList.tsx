@@ -13,8 +13,10 @@ const FilmList = () => {
 
   const handleBuyTicket = () => {
     const token = localStorage.getItem("token");
+    const selectedFilm = films[activeIndex];
+
     if (token) {
-      navigate("/chair");
+      navigate("/buy", { state: { film: selectedFilm } });
     } else {
       navigate("/login");
     }
@@ -101,7 +103,7 @@ const FilmList = () => {
             </p>
             <button
               onClick={handleBuyTicket}
-              className="text-lg font-semibold flex gap-2 items-center py-3.5 px-8 mt-4 bg-blue-600 text-white rounded-lg shadow-lg hover:bg-blue-700 transition-colors"
+              className="text-lg cursor-pointer font-semibold flex gap-2 items-center py-3.5 px-8 mt-4 bg-blue-600 text-white rounded-lg shadow-lg hover:bg-blue-700 transition-colors"
             >
               <TicketIcon className="w-6" />
               Buy Ticket
