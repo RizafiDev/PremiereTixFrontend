@@ -2,11 +2,11 @@ import axios from "axios";
 
 const API_FILMS_URL = "http://127.0.0.1:8000/api/dashboard/films";
 const API_GENRES_URL = "http://127.0.0.1:8000/api/dashboard/genres";
-const IMAGE_BASE_URL = "http://127.0.0.1:8000/storage/"; // Sesuaikan dengan lokasi penyimpanan gambar
+const IMAGE_BASE_URL = "http://127.0.0.1:8000/storage/";
 
 export interface Genre {
   id: number;
-  genre: string; // Menggunakan "genre" sesuai respons API genres
+  genre: string;
   color: string;
 }
 
@@ -22,9 +22,6 @@ export interface Film {
   genres: Genre[];
 }
 
-/**
- * Mengambil daftar genre dari API
- */
 const getGenres = async (): Promise<Genre[]> => {
   try {
     const response = await axios.get<{ data: Genre[] }>(API_GENRES_URL);
@@ -35,31 +32,25 @@ const getGenres = async (): Promise<Genre[]> => {
   }
 };
 
-/**
- * Mengambil daftar film dari API dan menghubungkan dengan genre yang benar
- */
 export const getFilms = async (): Promise<Film[]> => {
   try {
-    // Ambil data genre dan film secara paralel
     const [genresResponse, filmsResponse] = await Promise.all([
       getGenres(),
       axios.get<{ data: Film[] }>(API_FILMS_URL),
     ]);
 
-    // Ubah array genres menjadi objek untuk pencarian cepat
     const genresMap = genresResponse.reduce((acc, genre) => {
       acc[genre.id] = genre;
       return acc;
     }, {} as Record<number, Genre>);
 
-    // Format data film
     return filmsResponse.data.data.map((film) => ({
       ...film,
-      photo: IMAGE_BASE_URL + film.photo, // Format path gambar
+      photo: IMAGE_BASE_URL + film.photo,
       genres: film.genres.map((genre) => ({
         id: genre.id,
-        genre: genresMap[genre.id]?.genre || "Unknown", // Menggunakan "genre" dari API genres
-        color: genresMap[genre.id]?.color || "#000000", // Menggunakan warna dari API genres
+        genre: genresMap[genre.id]?.genre || "Unknown",
+        color: genresMap[genre.id]?.color || "#000000",
       })),
     }));
   } catch (error) {
