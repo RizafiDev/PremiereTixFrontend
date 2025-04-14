@@ -1,101 +1,101 @@
-import { useEffect, useState } from "react";
-import { useLocation } from "react-router-dom";
-import { Film } from "@/services/filmService";
-import { getSchedules, Schedule } from "@/services/scheduleService";
-import dayjs from "dayjs";
+import { getFilms, Film } from "@/services/filmService";
+import { useState, useEffect } from "react";
+import { ArrowLeftCircleIcon as BackIcon } from "@heroicons/react/24/solid";
+import { useNavigate } from "react-router-dom";
 
 function BuyTicket() {
-  const location = useLocation();
-  const film: Film = location.state?.film;
-  const [schedules, setSchedules] = useState<Schedule[]>([]);
-  const [loading, setLoading] = useState(true);
+  const navigate = useNavigate();
+  const [films, setFilms] = useState<Film[]>([]);
+  const [loading, setLoading] = useState<boolean>(true);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    if (!film) return;
-
-    const fetchSchedules = async () => {
+    const fetchFilms = async () => {
       try {
-        const allSchedules = await getSchedules();
-        // Filter schedule berdasarkan film ID
-        const filtered = allSchedules.filter((s) => s.film?.id === film.id);
-        setSchedules(filtered);
-      } catch (error) {
-        console.error("Gagal memuat jadwal film:", error);
+        const data = await getFilms();
+        setFilms(data);
+      } catch (err) {
+        setError("Gagal mengambil data film");
       } finally {
         setLoading(false);
       }
     };
 
-    fetchSchedules();
-  }, [film]);
+    fetchFilms();
+  }, []);
 
-  if (!film) {
-    return <p>Film tidak ditemukan. Silakan kembali ke daftar film.</p>;
-  }
+  if (loading) return <div>Loading...</div>;
+  if (error) return <div>{error}</div>;
 
   return (
-    <div className="p-6 max-w-4xl mx-auto">
-      <h1 className="text-3xl font-bold mb-4">Beli Tiket: {film.title}</h1>
-      <img src={film.photo} alt={film.title} className="w-60 rounded-xl mb-4" />
-      <p className="text-gray-700 mb-2">{film.description}</p>
-      <p className="text-sm text-gray-600 mb-1">
-        <strong>Rilis:</strong>{" "}
-        {new Date(film.release_date).toLocaleDateString("id-ID", {
-          day: "numeric",
-          month: "long",
-          year: "numeric",
-        })}
-      </p>
-      <p className="text-sm text-gray-600 mb-1">
-        <strong>Negara:</strong> {film.country}
-      </p>
-      <p className="text-sm text-gray-600 mb-1">
-        <strong>Rating:</strong> {film.rating}
-      </p>
-      <p className="text-sm text-gray-600 mb-4">
-        <strong>Genres:</strong>{" "}
-        {film.genres.map((g) => (
-          <span key={g.id} style={{ color: g.color }} className="mr-2">
-            {g.genre}
-          </span>
-        ))}
-      </p>
+    <div className="container relative mx-auto overflow-hidden">
+      <button className="absolute" onClick={() => navigate("/")}>
+        <BackIcon className="size-10 text-white mt-4 ml-20" />
+      </button>
 
-      {/* Jadwal tayang asli dari API */}
-      <h2 className="text-xl font-semibold mb-2">Jadwal Tayang</h2>
-
-      {loading ? (
-        <p>Memuat jadwal...</p>
-      ) : schedules.length === 0 ? (
-        <p className="text-gray-500">Belum ada jadwal untuk film ini.</p>
-      ) : (
-        <div className="space-y-4">
-          {schedules.map((schedule) => (
-            <div
-              key={schedule.id}
-              className="border p-4 rounded-lg shadow-sm hover:shadow-md transition"
-            >
-              <p className="text-lg font-medium">{schedule.cinema?.name}</p>
-              <p className="text-gray-600">
-                <strong>Studio:</strong> {schedule.studio || "-"}
+      {films.map((film) => (
+        <div key={film.id} className="flex flex-col w-full ">
+          <div className="banner w-full h-64 overflow-hidden shadow-md">
+            <img
+              src={film.photo}
+              alt={film.title}
+              className="w-full h-full object-cover"
+            />
+          </div>
+          <div className="description pb-12 -my-12 z-50 flex items-end gap-5 justify-center">
+            <img
+              src={film.photo}
+              className="w-56 aspect-9/12 rounded-3xl shadow-xs object-cover"
+              alt=""
+            />
+            <div className="text flex flex-col items-start gap-2 pb-4">
+              <h2 className="font-bold text-5xl">{film.title}</h2>
+              <p className="text-gray-500">
+                Description:{" "}
+                <span className="text-black">{film.description}</span>
               </p>
-              <p className="text-gray-600">
-                <strong>Jam Tayang:</strong>{" "}
-                {dayjs(schedule.show_time).format("DD MMM YYYY, HH:mm")}
+              <p className="text-gray-500">
+                Genre:{" "}
+                {film.genres.map((g, i) => (
+                  <span key={g.id} className="text-black mr-2">
+                    {g.genre}
+                    {i < film.genres.length - 1 && ","}
+                  </span>
+                ))}
               </p>
-              <button
-                className="mt-2 px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
-                onClick={() => {
-                  // nanti arahkan ke halaman select seat
-                  console.log("Pilih schedule ID:", schedule.id);
-                }}
-              >
-                Pilih Jadwal Ini
-              </button>
+              <p className="text-gray-500">
+                Country: <span className="text-black">{film.country}</span>
+              </p>
+              <p className="text-gray-500">
+                Rating: <span className="text-black ">{film.rating}</span>
+              </p>
             </div>
-          ))}
+          </div>
+          <div className="schedule flex flex-col mt-16 px-24 items-start w-full gap-4">
+            <div className="header flex">
+              <p className="font-bold text-3xl ">Schedule</p>
+            </div>
+            <div className="date-pick w-full">
+              <div className="overflow-x-auto -mx-4 px-4">
+                <ul className="flex items-center gap-2 pb-4" id="date-scroller">
+                  {/* active */}
+                  <li className="flex flex-col items-center font-semibold -space-y-1 bg-black py-2 w-23 rounded-sm text-white cursor-pointer">
+                    <p className="text-xs">14 Apr</p>
+                    <p className="">TODAY</p>
+                  </li>
+                  {/* passive */}
+                  <li className="flex flex-col items-center font-semibold -space-y-1 border border-black py-2 w-23 rounded-sm text-black cursor-pointer">
+                    <p className="text-xs">15 Apr</p>
+                    <p className="">
+                    TUE</p>
+                  </li>
+                  
+                </ul>
+              </div>
+            </div>
+          </div>
         </div>
-      )}
+      ))}
     </div>
   );
 }
