@@ -1,7 +1,9 @@
 import { getFilms, Film } from "@/services/filmService";
 import { useState, useEffect } from "react";
 import { ArrowLeftCircleIcon as BackIcon } from "@heroicons/react/24/solid";
+import { BuildingLibraryIcon as CinemaIcon } from "@heroicons/react/24/solid";
 import { useNavigate } from "react-router-dom";
+import xxi from "../../../../public/XXI.svg"
 
 function BuyTicket() {
   const navigate = useNavigate();
@@ -71,9 +73,9 @@ function BuyTicket() {
               </p>
             </div>
           </div>
-          <div className="schedule flex flex-col mt-16 px-24 items-start w-full gap-4">
+          <div className="schedule flex flex-col mt-8 px-24 items-start w-full gap-4">
             <div className="header flex">
-              <p className="font-bold text-3xl ">Schedule</p>
+              <p className="font-bold text-4xl ">Schedule</p>
             </div>
             <div className="date-pick w-full">
               <div className="overflow-x-auto -mx-4 px-4">
@@ -86,12 +88,41 @@ function BuyTicket() {
                   {/* passive */}
                   <li className="flex flex-col items-center font-semibold -space-y-1 border border-black py-2 w-23 rounded-sm text-black cursor-pointer">
                     <p className="text-xs">15 Apr</p>
-                    <p className="">
-                    TUE</p>
+                    <p className="">TUE</p>
                   </li>
-                  
                 </ul>
               </div>
+            </div>
+            <div className="cinema-option w-full">
+              <ul className="grid grid-cols-2 w-full gap-8">
+                <li className="flex w-full border border-black py-5 px-8 rounded-2xl flex-col gap-3">
+                  <div className="header flex items-center justify-between w-full">
+                    <div className="title flex items-center gap-2">
+                      <CinemaIcon className="size-10 text-black" />
+                      <div className="name">
+                        <p className="uppercase font-semibold">SOLO PARAGON XXI</p>
+                        <p className="uppercase text-xs">JL. YOSODIPURO NO.133</p>
+                      </div>
+                    </div>
+                    <div className="xxi size-8 flex"><img src={xxi} alt="" /></div>
+                  </div>
+                  <div className="studio price pl-12 flex items-center justify-between">
+                    <p className="text-xs font-semibold text-gray-600">STUDIO 2</p>
+                    <p className="text-xs font-semibold text-gray-600">Rp. 35.000</p>
+
+                  </div>
+                  <div className="time pl-12">
+                    <ul className="flex items-center gap-3">
+                      {/* expired/full */}
+                      <li className="border border-gray-300 cursor-pointer bg-gray-300 text-gray-500 text-xs font-semibold py-1 px-4 w-fit rounded-sm">12:30
+                      </li>
+                      {/* avaiable */}
+                      <li className="border border-gray-400 cursor-pointer   text-xs font-semibold py-1 px-4 w-fit rounded-sm">12:30
+                      </li>
+                    </ul>
+                  </div>
+                </li>
+              </ul>
             </div>
           </div>
         </div>
