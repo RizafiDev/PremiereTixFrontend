@@ -4,15 +4,18 @@ import { Film } from "@/services/filmService";
 import {
   ArrowLeftCircleIcon as BackIcon,
   BuildingLibraryIcon as CinemaIcon,
+  TicketIcon,
 } from "@heroicons/react/24/solid";
 import {
   getSchedulesByFilm,
+  isScheduleFull,
   Schedule,
   Cinema,
 } from "@/services/scheduleService";
 import dayjs from "dayjs";
 import isBetween from "dayjs/plugin/isBetween";
 import xxi from "../../../../public/XXI.svg";
+
 
 dayjs.extend(isBetween);
 
@@ -22,6 +25,7 @@ interface GroupedShowtime {
   showDate: string;
   studio: string;
   price: number;
+  isFull: boolean;
 }
 
 interface StudioGroup {
@@ -31,6 +35,7 @@ interface StudioGroup {
     id: number;
     time: string;
     showDate: string;
+    isFull: boolean;
   }>;
 }
 
@@ -48,10 +53,24 @@ function BuyTicket() {
   const [selectedDate, setSelectedDate] = useState<string>(
     dayjs().format("YYYY-MM-DD")
   );
+  const [selectedTime, setSelectedTime] = useState<string | null>(null);
+  const [fullScheduleIds, setFullScheduleIds] = useState<number[]>([]);
 
   useEffect(() => {
     if (film) {
-      getSchedulesByFilm(film.id).then(setSchedules);
+      getSchedulesByFilm(film.id).then(async (data) => {
+        setSchedules(data);
+
+        const fullChecks = await Promise.all(
+          data.map((schedule) => isScheduleFull(schedule.id))
+        );
+
+        const fullIds = data
+          .filter((_, index) => fullChecks[index])
+          .map((s) => s.id);
+
+        setFullScheduleIds(fullIds);
+      });
     }
   }, [film]);
 
@@ -60,12 +79,10 @@ function BuyTicket() {
 
   const upcomingDays = [...Array(7)].map((_, i) => dayjs().add(i, "day"));
 
-  // Filter jadwal berdasarkan tanggal yang dipilih
   const filteredSchedules = schedules.filter(
     (s) => dayjs(s.show_date).format("YYYY-MM-DD") === selectedDate
   );
 
-  // Kelompokkan jadwal berdasarkan cinema ID
   const groupedByCinema = filteredSchedules.reduce<Record<number, CinemaGroup>>(
     (grouped, schedule) => {
       const cinemaId = schedule.cinema?.id || 0;
@@ -77,13 +94,13 @@ function BuyTicket() {
         };
       }
 
-      // Tambahkan waktu tayang dan informasi studio ke cinema yang sudah ada
       grouped[cinemaId].showtimes.push({
         id: schedule.id,
         time: schedule.show_time,
         showDate: schedule.show_date,
         studio: schedule.studio,
         price: schedule.price || 0,
+        isFull: fullScheduleIds.includes(schedule.id),
       });
 
       return grouped;
@@ -91,7 +108,6 @@ function BuyTicket() {
     {}
   );
 
-  // Konversi hasil pengelompokan ke array
   const groupedSchedules = Object.values(groupedByCinema);
 
   return (
@@ -99,7 +115,20 @@ function BuyTicket() {
       <button className="absolute" onClick={() => navigate("/")}>
         <BackIcon className="size-10 text-white mt-4 ml-20" />
       </button>
+      <button
+        onClick={() => navigate("/select-seat")}
+        className={`flex items-center font-semibold gap-2 w-full justify-center py-4 fixed bottom-0 right-0 ${
+          selectedTime
+            ? "bg-black text-white cursor-pointer"
+            : "bg-gray-300 text-gray-500 cursor-not-allowed"
+        }`}
+        disabled={!selectedTime}
+      >
+        <TicketIcon className="size-6" />
+        CHECKOUT
+      </button>
 
+      {/* Banner dan deskripsi film */}
       <div className="flex flex-col w-full">
         <div className="banner w-full h-64 overflow-hidden shadow-md">
           <img
@@ -118,8 +147,7 @@ function BuyTicket() {
           <div className="text flex flex-col items-start gap-2 pb-4">
             <h2 className="font-bold text-5xl">{film.title}</h2>
             <p className="text-gray-500 max-w-[1100px]">
-              Description:{" "}
-              <span className="text-black">{film.description}</span>
+              Description: <span className="text-black">{film.description}</span>
             </p>
             <p className="text-gray-500">
               Genre:{" "}
@@ -139,8 +167,8 @@ function BuyTicket() {
           </div>
         </div>
 
-        {/* Jadwal hanya untuk film ini */}
-        <div className="schedule flex flex-col mt-8 px-24 items-start w-full gap-4">
+        {/* Schedule */}
+        <div className="schedule flex flex-col mt-8 px-24 items-start w-full gap-4 mb-24">
           <div className="header flex">
             <p className="font-bold text-4xl ">Schedule</p>
           </div>
@@ -188,7 +216,7 @@ function BuyTicket() {
                     </div>
                   </div>
 
-                  {/* Group shows by studio */}
+                  {/* Jadwal dikelompokkan per studio */}
                   {Object.entries(
                     cinemaGroup.showtimes.reduce<Record<string, StudioGroup>>(
                       (studios, show) => {
@@ -203,13 +231,13 @@ function BuyTicket() {
                           id: show.id,
                           time: show.time,
                           showDate: show.showDate,
+                          isFull: show.isFull,
                         });
                         return studios;
                       },
                       {}
                     )
                   ).map(([studioKey, studioData]) => {
-                    // Urutkan waktu tayang dari paling awal ke paling akhir
                     const sortedTimes = [...studioData.times].sort((a, b) => {
                       return dayjs(`${a.showDate} ${a.time}`).isBefore(
                         dayjs(`${b.showDate} ${b.time}`)
@@ -225,8 +253,7 @@ function BuyTicket() {
                             STUDIO {studioData.studio}
                           </p>
                           <p className="text-xs font-semibold text-gray-600">
-                            Rp{" "}
-                            {Number(studioData.price).toLocaleString("id-ID")},-
+                            Rp {Number(studioData.price).toLocaleString("id-ID")},-
                           </p>
                         </div>
 
@@ -242,10 +269,17 @@ function BuyTicket() {
                                 <li
                                   key={timeInfo.id}
                                   className={`border text-xs font-semibold py-1 px-4 w-fit rounded-sm ${
-                                    isPast
+                                    isPast || timeInfo.isFull
                                       ? "bg-gray-300 text-gray-500 border-gray-300 cursor-not-allowed"
+                                      : selectedTime === showTimeFull
+                                      ? "bg-black text-white border-black"
                                       : "border-gray-400 cursor-pointer"
                                   }`}
+                                  onClick={() =>
+                                    !isPast &&
+                                    !timeInfo.isFull &&
+                                    setSelectedTime(showTimeFull)
+                                  }
                                 >
                                   {dayjs(
                                     `${timeInfo.showDate} ${timeInfo.time}`,
