@@ -12,10 +12,10 @@ import {
   Schedule,
   Cinema,
 } from "@/services/scheduleService";
+import { useBookingStore } from "@/stores/useBookingStore"; // Adjust path as needed
 import dayjs from "dayjs";
 import isBetween from "dayjs/plugin/isBetween";
 import xxi from "../../../../public/XXI.svg";
-
 
 dayjs.extend(isBetween);
 
@@ -49,16 +49,41 @@ function BuyTicket() {
   const navigate = useNavigate();
   const film: Film = location.state?.film;
 
+  // Get state from Zustand store
+  const { booking, setBooking } = useBookingStore();
+
+  // If no film in URL state but exists in store, use that
+  const currentFilm = film || booking.film;
+
   const [schedules, setSchedules] = useState<Schedule[]>([]);
   const [selectedDate, setSelectedDate] = useState<string>(
-    dayjs().format("YYYY-MM-DD")
+    booking.showDate || dayjs().format("YYYY-MM-DD")
   );
-  const [selectedTime, setSelectedTime] = useState<string | null>(null);
+  const [selectedShowtime, setSelectedShowtime] = useState<{
+    id: number | null;
+    time: string | null;
+    cinema: Cinema | null;
+    studio: string | null;
+    price: number | null;
+  }>({
+    id: booking.showtimeId,
+    time: booking.showtimeTime,
+    cinema: booking.cinema,
+    studio: booking.studio,
+    price: booking.price,
+  });
   const [fullScheduleIds, setFullScheduleIds] = useState<number[]>([]);
+  const [isLoading, setIsLoading] = useState<boolean>(true);
 
   useEffect(() => {
-    if (film) {
-      getSchedulesByFilm(film.id).then(async (data) => {
+    if (currentFilm) {
+      // Save film to store if coming from location state
+      if (film && !booking.film) {
+        setBooking({ film });
+      }
+      setIsLoading(true);
+
+      getSchedulesByFilm(currentFilm.id).then(async (data) => {
         setSchedules(data);
 
         const fullChecks = await Promise.all(
@@ -70,12 +95,21 @@ function BuyTicket() {
           .map((s) => s.id);
 
         setFullScheduleIds(fullIds);
+        setIsLoading(false);
       });
     }
-  }, [film]);
+  }, [currentFilm, film, booking.film, setBooking]);
 
-  if (!film)
+  if (!currentFilm)
     return <p>Film tidak ditemukan. Silakan kembali ke daftar film.</p>;
+  if (isLoading) {
+    // Tampilkan elemen loading saat isLoading true
+    return (
+      <div className="flex items-center justify-center h-screen">
+        <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-black" />
+      </div>
+    );
+  }
 
   const upcomingDays = [...Array(7)].map((_, i) => dayjs().add(i, "day"));
 
@@ -110,19 +144,67 @@ function BuyTicket() {
 
   const groupedSchedules = Object.values(groupedByCinema);
 
+  const handleDateSelect = (date: string) => {
+    setSelectedDate(date);
+    // Reset selected showtime when date changes
+    setSelectedShowtime({
+      id: null,
+      time: null,
+      cinema: null,
+      studio: null,
+      price: null,
+    });
+  };
+
+  const handleShowtimeSelect = (
+    id: number,
+    time: string,
+    showDate: string,
+    cinema: Cinema,
+    studio: string,
+    price: number
+  ) => {
+    const showtimeTime = `${showDate} ${time}`;
+
+    // Update local state
+    setSelectedShowtime({
+      id,
+      time: showtimeTime,
+      cinema,
+      studio,
+      price,
+    });
+
+    // Update store
+    setBooking({
+      showtimeId: id,
+      showtimeTime,
+      showDate,
+      cinema,
+      studio,
+      price,
+    });
+  };
+
+  const handleProceedToSeats = () => {
+    if (selectedShowtime.id) {
+      navigate("/select-seat");
+    }
+  };
+
   return (
     <div className="container relative mx-auto overflow-hidden">
       <button className="absolute" onClick={() => navigate("/")}>
         <BackIcon className="size-10 text-white mt-4 ml-20" />
       </button>
       <button
-        onClick={() => navigate("/select-seat")}
+        onClick={handleProceedToSeats}
         className={`flex items-center font-semibold gap-2 w-full justify-center py-4 fixed bottom-0 right-0 ${
-          selectedTime
+          selectedShowtime.id
             ? "bg-black text-white cursor-pointer"
             : "bg-gray-300 text-gray-500 cursor-not-allowed"
         }`}
-        disabled={!selectedTime}
+        disabled={!selectedShowtime.id}
       >
         <TicketIcon className="size-6" />
         CHECKOUT
@@ -132,37 +214,38 @@ function BuyTicket() {
       <div className="flex flex-col w-full">
         <div className="banner w-full h-64 overflow-hidden shadow-md">
           <img
-            src={film.photo}
-            alt={film.title}
+            src={currentFilm.photo}
+            alt={currentFilm.title}
             className="w-full h-full object-cover"
           />
         </div>
 
         <div className="description pb-12 -my-12 z-50 flex items-end gap-5 justify-start ml-24">
           <img
-            src={film.photo}
+            src={currentFilm.photo}
             className="w-56 aspect-9/12 rounded-3xl shadow-xs object-cover"
             alt=""
           />
           <div className="text flex flex-col items-start gap-2 pb-4">
-            <h2 className="font-bold text-5xl">{film.title}</h2>
+            <h2 className="font-bold text-5xl">{currentFilm.title}</h2>
             <p className="text-gray-500 max-w-[1100px]">
-              Description: <span className="text-black">{film.description}</span>
+              Description:{" "}
+              <span className="text-black">{currentFilm.description}</span>
             </p>
             <p className="text-gray-500">
               Genre:{" "}
-              {film.genres.map((g, i) => (
+              {currentFilm.genres.map((g, i) => (
                 <span key={g.id} className="text-black mr-2">
                   {g.genre}
-                  {i < film.genres.length - 1 && ","}
+                  {i < currentFilm.genres.length - 1 && ","}
                 </span>
               ))}
             </p>
             <p className="text-gray-500">
-              Country: <span className="text-black">{film.country}</span>
+              Country: <span className="text-black">{currentFilm.country}</span>
             </p>
             <p className="text-gray-500">
-              Rating: <span className="text-black">{film.rating}</span>
+              Rating: <span className="text-black">{currentFilm.rating}</span>
             </p>
           </div>
         </div>
@@ -183,7 +266,7 @@ function BuyTicket() {
                       ? "bg-black text-white"
                       : "border border-black text-black"
                   }`}
-                  onClick={() => setSelectedDate(d.format("YYYY-MM-DD"))}
+                  onClick={() => handleDateSelect(d.format("YYYY-MM-DD"))}
                 >
                   <p className="text-xs">{d.format("DD MMM")}</p>
                   <p className="">{d.format("ddd").toUpperCase()}</p>
@@ -253,7 +336,8 @@ function BuyTicket() {
                             STUDIO {studioData.studio}
                           </p>
                           <p className="text-xs font-semibold text-gray-600">
-                            Rp {Number(studioData.price).toLocaleString("id-ID")},-
+                            Rp{" "}
+                            {Number(studioData.price).toLocaleString("id-ID")},-
                           </p>
                         </div>
 
@@ -265,20 +349,31 @@ function BuyTicket() {
                                 dayjs(showTimeFull)
                               );
 
+                              // Check if this is the selected time
+                              const isSelected =
+                                selectedShowtime.id === timeInfo.id;
+
                               return (
                                 <li
                                   key={timeInfo.id}
                                   className={`border text-xs font-semibold py-1 px-4 w-fit rounded-sm ${
                                     isPast || timeInfo.isFull
                                       ? "bg-gray-300 text-gray-500 border-gray-300 cursor-not-allowed"
-                                      : selectedTime === showTimeFull
+                                      : isSelected
                                       ? "bg-black text-white border-black"
                                       : "border-gray-400 cursor-pointer"
                                   }`}
                                   onClick={() =>
                                     !isPast &&
                                     !timeInfo.isFull &&
-                                    setSelectedTime(showTimeFull)
+                                    handleShowtimeSelect(
+                                      timeInfo.id,
+                                      timeInfo.time,
+                                      timeInfo.showDate,
+                                      cinemaGroup.cinema,
+                                      studioData.studio,
+                                      studioData.price
+                                    )
                                   }
                                 >
                                   {dayjs(

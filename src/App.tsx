@@ -5,6 +5,7 @@ import Login from "./Pages/auth/Login";
 import Register from "./Pages/auth/Register";
 import BuyTicket from "./Pages/transaction/films/BuyTicket";
 import SelectSeat from "./Pages/transaction/films/SelectSeat";
+import Payment from "./Pages/transaction/films/Payment";
 
 function App() {
   return (
@@ -20,6 +21,7 @@ function App() {
         {/* films transactions */}
         <Route path="/select-seat" element={<SelectSeat />} />
         <Route path="/buy" element={<BuyTicket />} />
+        <Route path="/payment" element={<Payment />} />
       </Routes>
     </Router>
   );
