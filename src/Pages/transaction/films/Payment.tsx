@@ -8,6 +8,12 @@ import {
 } from "@heroicons/react/24/outline";
 import dayjs from "dayjs";
 
+declare global {
+  interface Window {
+    snap: any;
+  }
+}
+
 function PaymentMethod({
   icon,
   name,
@@ -58,21 +64,54 @@ function Payment() {
     }
   }, [booking, navigate]);
 
-  const handlePayment = () => {
-    // Simulate payment processing
+  const totalAmount = booking.selectedSeats.length * (booking.price || 0);
+  const serviceFee = Math.round(totalAmount * 0.05); // 5% service fee
+  const grandTotal = totalAmount + serviceFee;
+
+  const handlePayment = async () => {
     setIsProcessing(true);
 
-    // Here you would make an API call to create the booking in your database
-    setTimeout(() => {
-      setIsProcessing(false);
-      setIsComplete(true);
+    try {
+      // Panggil API dummy untuk mendapatkan token
+      const response = await fetch(
+        "http://localhost:5000/generate-dummy-token",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            orderId: `ORDER-${new Date().getTime()}`,
+            grossAmount: grandTotal,
+          }),
+        }
+      );
 
-      // After showing success state, redirect and reset
-      setTimeout(() => {
-        resetBooking();
-        navigate("/");
-      }, 3000);
-    }, 2000);
+      const data = await response.json();
+
+      if (data.token) {
+        // Memunculkan Midtrans Snap
+        window.snap.pay(data.token, {
+          onSuccess: function (result: any) {
+            console.log("Payment success:", result);
+            setIsComplete(true);
+          },
+          onPending: function (result: any) {
+            console.log("Payment pending:", result);
+          },
+          onError: function (result: any) {
+            console.error("Payment error:", result);
+          },
+          onClose: function () {
+            console.log("Payment popup closed");
+          },
+        });
+      }
+    } catch (error) {
+      console.error("Error during payment:", error);
+    } finally {
+      setIsProcessing(false);
+    }
   };
 
   if (!booking.film) {
@@ -100,10 +139,6 @@ function Payment() {
       </div>
     );
   }
-
-  const totalAmount = booking.selectedSeats.length * (booking.price || 0);
-  const serviceFee = Math.round(totalAmount * 0.05); // 5% service fee
-  const grandTotal = totalAmount + serviceFee;
 
   return (
     <div className="container mx-auto px-6 py-8 max-w-4xl">
