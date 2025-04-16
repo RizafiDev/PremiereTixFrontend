@@ -3,8 +3,6 @@ import { useNavigate } from "react-router-dom";
 import { useBookingStore } from "@/stores/useBookingStore";
 import {
   ArrowLeftCircleIcon as BackIcon,
-  CreditCardIcon,
-  QrCodeIcon,
   WalletIcon,
   CheckCircleIcon,
 } from "@heroicons/react/24/outline";
@@ -179,101 +177,12 @@ function Payment() {
 
           <div className="space-y-3 mb-6">
             <PaymentMethod
-              icon={<CreditCardIcon className="w-6 h-6" />}
-              name="Credit/Debit Card"
-              selected={selectedMethod === "creditCard"}
-              onSelect={() => setSelectedMethod("creditCard")}
-            />
-
-            <PaymentMethod
               icon={<WalletIcon className="w-6 h-6" />}
-              name="E-Wallet (OVO, GoPay, DANA)"
-              selected={selectedMethod === "eWallet"}
-              onSelect={() => setSelectedMethod("eWallet")}
-            />
-
-            <PaymentMethod
-              icon={<QrCodeIcon className="w-6 h-6" />}
-              name="QRIS"
-              selected={selectedMethod === "qris"}
-              onSelect={() => setSelectedMethod("qris")}
+              name="Mid Trans"
+              selected={selectedMethod === "midtrans"}
+              onSelect={() => setSelectedMethod("midtrans")}
             />
           </div>
-
-          {selectedMethod === "creditCard" && (
-            <div className="space-y-4 mb-6">
-              <div>
-                <label className="block text-sm font-medium mb-1">
-                  Card Number
-                </label>
-                <input
-                  type="text"
-                  placeholder="1234 5678 9012 3456"
-                  className="w-full border border-gray-300 rounded-lg p-3"
-                />
-              </div>
-
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-sm font-medium mb-1">
-                    Expiry Date
-                  </label>
-                  <input
-                    type="text"
-                    placeholder="MM/YY"
-                    className="w-full border border-gray-300 rounded-lg p-3"
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium mb-1">CVV</label>
-                  <input
-                    type="text"
-                    placeholder="123"
-                    className="w-full border border-gray-300 rounded-lg p-3"
-                  />
-                </div>
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium mb-1">
-                  Cardholder Name
-                </label>
-                <input
-                  type="text"
-                  placeholder="Full Name"
-                  className="w-full border border-gray-300 rounded-lg p-3"
-                />
-              </div>
-            </div>
-          )}
-
-          {selectedMethod === "eWallet" && (
-            <div className="bg-gray-100 p-4 rounded-lg mb-6">
-              <p className="mb-2">Select E-Wallet:</p>
-              <div className="grid grid-cols-3 gap-3">
-                <button className="bg-white p-3 rounded-lg border border-gray-300 font-medium">
-                  OVO
-                </button>
-                <button className="bg-white p-3 rounded-lg border border-gray-300 font-medium">
-                  GoPay
-                </button>
-                <button className="bg-white p-3 rounded-lg border border-gray-300 font-medium">
-                  DANA
-                </button>
-              </div>
-            </div>
-          )}
-
-          {selectedMethod === "qris" && (
-            <div className="bg-gray-100 p-6 rounded-lg mb-6 text-center">
-              <div className="bg-white w-48 h-48 mx-auto mb-3 flex items-center justify-center border">
-                <span className="text-gray-500">QRIS Code</span>
-              </div>
-              <p className="text-gray-600">
-                Scan this code with your payment app
-              </p>
-            </div>
-          )}
 
           <button
             onClick={handlePayment}

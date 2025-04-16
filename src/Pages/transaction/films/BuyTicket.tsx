@@ -78,7 +78,7 @@ function BuyTicket() {
   useEffect(() => {
     if (currentFilm) {
       // Save film to store if coming from location state
-      if (film && !booking.film) {
+      if (film && (!booking.film || booking.film.id !== film.id)) {
         setBooking({ film });
       }
       setIsLoading(true);
@@ -189,6 +189,8 @@ function BuyTicket() {
   const handleProceedToSeats = () => {
     if (selectedShowtime.id) {
       navigate("/select-seat");
+    } else {
+      alert("Pilih jadwal terlebih dahulu!");
     }
   };
 
