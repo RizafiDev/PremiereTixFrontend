@@ -6,6 +6,7 @@ import {
   EyeSlashIcon as EyeSlash,
   ChevronLeftIcon as ArrowLeft,
 } from "@heroicons/react/24/solid";
+import { useAuthStore } from "@/stores/useAuthStore";
 
 function Register() {
   const [showPassword, setShowPassword] = useState(false);
@@ -22,6 +23,7 @@ function Register() {
     setShowPassword(!showPassword);
   };
 
+  const { login } = useAuthStore();
   const navigate = useNavigate();
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -54,11 +56,6 @@ function Register() {
     return true;
   };
 
-  const generateRememberToken = () => {
-    // Generate token acak menggunakan Math.random dan Date.now
-    return Math.random().toString(36).substring(2) + Date.now().toString(36);
-  };
-
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
@@ -68,18 +65,12 @@ function Register() {
     setErrorMessage("");
 
     try {
-      // Generate remember_token
-      const rememberToken = generateRememberToken();
-
-      // Data yang akan dikirim ke API
       const payload = {
         name: formData.name,
         email: formData.email,
         password: formData.password,
-        remember_token: rememberToken, // Tambahkan remember_token
       };
 
-      // Kirim data ke API menggunakan axios
       const response = await axios.post(
         "http://127.0.0.1:8000/api/dashboard/app-users",
         payload,
@@ -91,16 +82,13 @@ function Register() {
         }
       );
 
-      // Jika registrasi berhasil, navigasi ke halaman login
       if (response.status === 200 || response.status === 201) {
         const { token, user } = response.data;
 
-        // Simpan token dan data user di localStorage
-        localStorage.setItem("token", token);
-        localStorage.setItem("user", JSON.stringify(user));
+        // Gunakan store untuk login
+        login(user, token);
 
-        // Navigasi ke halaman utama
-        navigate("/login");
+        navigate("/");
       }
     } catch (error: any) {
       setErrorMessage(

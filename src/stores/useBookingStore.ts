@@ -3,7 +3,7 @@ import { persist } from "zustand/middleware";
 import { Film } from "@/services/filmService";
 import { Cinema } from "@/services/scheduleService";
 
-interface BookingData {
+export interface BookingData {
   film: Film | null;
   cinema: Cinema | null;
   showtimeId: number | null;

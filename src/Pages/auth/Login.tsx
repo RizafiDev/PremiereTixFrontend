@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
+import { useAuthStore } from "@/stores/useAuthStore";
 import {
   EyeIcon as Eye,
   EyeSlashIcon as EyeSlash,
@@ -17,11 +18,12 @@ function Login() {
     remember: false, // Untuk checkbox "Ingat saya"
   });
 
+  const { login } = useAuthStore();
+  const navigate = useNavigate();
+
   const togglePasswordVisibility = () => {
     setShowPassword(!showPassword);
   };
-
-  const navigate = useNavigate();
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value, checked, type } = e.target;
@@ -57,13 +59,11 @@ function Login() {
     setErrorMessage("");
 
     try {
-      // Data yang akan dikirim ke API
       const payload = {
         email: formData.email,
         password: formData.password,
       };
 
-      // Kirim data ke API menggunakan axios
       const response = await axios.post(
         "http://127.0.0.1:8000/api/dashboard/app-users/login",
         payload,
@@ -75,15 +75,12 @@ function Login() {
         }
       );
 
-      // Jika login berhasil, simpan remember_token dan navigasi ke dashboard
       if (response.status === 200 || response.status === 201) {
         const { token, user } = response.data;
 
-        // Simpan token dan data user di localStorage
-        localStorage.setItem("token", token);
-        localStorage.setItem("user", JSON.stringify(user));
+        // Gunakan store untuk login
+        login(user, token);
 
-        // Navigasi ke halaman utama
         navigate("/");
       }
     } catch (error: any) {

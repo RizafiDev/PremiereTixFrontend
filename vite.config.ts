@@ -8,6 +8,14 @@ export default defineConfig({
   server: {
     host: "127.0.0.1", // Bisa diakses dari jaringan lain
     port: 3000, // Ganti dengan port yang diinginkan
+    proxy: {
+      "/api": {
+        target: "http://127.0.0.1:8000",
+        changeOrigin: true,
+        secure: false,
+        // rewrite: path => path.replace(/^\/api/, '')
+      },
+    }, // This closing brace was missing
   },
   plugins: [react(), tailwindcss()],
   resolve: {

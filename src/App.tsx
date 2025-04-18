@@ -6,24 +6,56 @@ import Register from "./Pages/auth/Register";
 import BuyTicket from "./Pages/transaction/films/BuyTicket";
 import SelectSeat from "./Pages/transaction/films/SelectSeat";
 import Payment from "./Pages/transaction/films/Payment";
+import { AuthInitializer } from "@/components/AuthInitializer";
+import { ProtectedRoute } from "@/components/ProtectedRoute";
 
 function App() {
   return (
-    <Router>
-      <Routes>
-        {/* default */}
-        <Route path="/" element={<Homepage />} />
-        <Route path="*" element={<Notfound />} />
-        {/* authentication */}
-        <Route path="/login" element={<Login />} />
-        <Route path="/register" element={<Register />} />
-        {/* transaction */}
-        {/* films transactions */}
-        <Route path="/select-seat" element={<SelectSeat />} />
-        <Route path="/buy" element={<BuyTicket />} />
-        <Route path="/payment" element={<Payment />} />
-      </Routes>
-    </Router>
+    <>
+      <AuthInitializer />
+      <Router>
+        <Routes>
+          {/* default */}
+          <Route path="/" element={<Homepage />} />
+          <Route path="*" element={<Notfound />} />
+
+          {/* authentication */}
+          <Route path="/login" element={<Login />} />
+          <Route path="/register" element={<Register />} />
+
+          {/* public transaction routes */}
+
+          {/* routes that need authentication check */}
+
+          <Route
+            path="/select-seat"
+            element={
+              <ProtectedRoute>
+                <SelectSeat />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/payment"
+            element={
+              <ProtectedRoute>
+                <Payment />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/buy"
+            element={
+              <ProtectedRoute>
+                <BuyTicket />
+              </ProtectedRoute>
+            }
+          />
+
+          {/* ... other protected routes */}
+        </Routes>
+      </Router>
+    </>
   );
 }
 

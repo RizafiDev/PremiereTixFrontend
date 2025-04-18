@@ -13,6 +13,7 @@ import {
   Cinema,
 } from "@/services/scheduleService";
 import { useBookingStore } from "@/stores/useBookingStore"; // Adjust path as needed
+import { useAuthStore } from "@/stores/useAuthStore";
 import dayjs from "dayjs";
 import isBetween from "dayjs/plugin/isBetween";
 import xxi from "../../../../public/XXI.svg";
@@ -48,6 +49,19 @@ function BuyTicket() {
   const location = useLocation();
   const navigate = useNavigate();
   const film: Film = location.state?.film;
+
+  const { isAuthenticated, initialize } = useAuthStore();
+
+  useEffect(() => {
+    const checkAuth = async () => {
+      await initialize();
+      if (!isAuthenticated) {
+        navigate("/login", { state: { from: "/buy" } });
+      }
+    };
+
+    checkAuth();
+  }, [isAuthenticated, initialize, navigate]);
 
   // Get state from Zustand store
   const { booking, setBooking } = useBookingStore();

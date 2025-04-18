@@ -7,6 +7,7 @@ import { useEffect, useState } from "react";
 import clsx from "clsx";
 import { useBookingStore } from "@/stores/useBookingStore"; // Adjust path as needed
 import { getSeatsBySchedule, Seat } from "@/services/scheduleService";
+import { useAuthStore } from "@/stores/useAuthStore";
 import dayjs from "dayjs";
 
 function SeatBox({
@@ -46,6 +47,7 @@ function formatCurrency(amount: number): string {
 }
 
 function SelectSeat() {
+  const { isAuthenticated, initialize } = useAuthStore();
   const navigate = useNavigate();
   const { booking, addSeat, removeSeat } = useBookingStore();
 
@@ -58,6 +60,17 @@ function SelectSeat() {
   const colsLeft = cols.slice(0, 4); // 1-4
   const colsMiddle = cols.slice(4, 15); // 5-15
   const colsRight = cols.slice(15); // 16-19
+
+  useEffect(() => {
+    const checkAuth = async () => {
+      await initialize();
+      if (!isAuthenticated) {
+        navigate("/login", { state: { from: "/select-seat" } });
+      }
+    };
+
+    checkAuth();
+  }, [isAuthenticated, initialize, navigate]);
 
   useEffect(() => {
     // Redirect if no showtime is selected
