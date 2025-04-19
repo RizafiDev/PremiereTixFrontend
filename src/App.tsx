@@ -8,6 +8,7 @@ import SelectSeat from "./Pages/transaction/films/SelectSeat";
 import Payment from "./Pages/transaction/films/Payment";
 import { AuthInitializer } from "@/components/AuthInitializer";
 import { ProtectedRoute } from "@/components/ProtectedRoute";
+import PaymentSuccess from "./Pages/transaction/films/PaymentSucces";
 
 function App() {
   return (
@@ -18,6 +19,9 @@ function App() {
           {/* default */}
           <Route path="/" element={<Homepage />} />
           <Route path="*" element={<Notfound />} />
+
+          {/* notification */}
+          <Route path="/success" element={<PaymentSuccess />} />
 
           {/* authentication */}
           <Route path="/login" element={<Login />} />
