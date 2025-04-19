@@ -1,3 +1,4 @@
+// File: src/pages/transaction/films/Payment.tsx
 import { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useBookingStore } from "@/stores/useBookingStore";
@@ -10,6 +11,24 @@ import {
 import dayjs from "dayjs";
 import axios from "axios";
 
+// ✅ Deklarasi Midtrans snap supaya tidak error di TypeScript
+declare global {
+  interface Window {
+    snap: {
+      pay: (
+        token: string,
+        callbacks: {
+          onSuccess?: (result: any) => void;
+          onPending?: (result: any) => void;
+          onError?: (error: any) => void;
+          onClose?: () => void;
+        }
+      ) => void;
+    };
+  }
+}
+
+// 💳 Komponen metode pembayaran
 function PaymentMethod({
   icon,
   name,
@@ -34,6 +53,7 @@ function PaymentMethod({
   );
 }
 
+// 💰 Format currency Indonesia
 function formatCurrency(amount: number): string {
   return new Intl.NumberFormat("id-ID", {
     style: "currency",
@@ -42,6 +62,7 @@ function formatCurrency(amount: number): string {
   }).format(amount);
 }
 
+// ✅ Endpoint transaksi Laravel API
 const API_ENDPOINT = "http://127.0.0.1:8000/api/dashboard/ticket-transactions";
 
 function Payment() {
@@ -60,6 +81,7 @@ function Payment() {
     init();
   }, [initialize]);
 
+  // 💵 Hitung total harga & fee
   const { totalAmount, serviceFee, grandTotal } = useMemo(() => {
     const amount = booking.selectedSeats.length * (booking.price || 0);
     const fee = Math.round(amount * 0.05);
@@ -70,27 +92,20 @@ function Payment() {
     };
   }, [booking.selectedSeats.length, booking.price]);
 
+  // 🧾 Fungsi pembayaran
   async function handlePayment() {
-    if (!user?.id) {
-      alert("User not authenticated");
-      return;
-    }
-
-    if (!booking.showtimeId) {
-      alert("No showtime selected");
-      return;
-    }
-
-    if (booking.selectedSeats.length === 0) {
-      alert("No seats selected");
-      return;
-    }
+    if (!user?.id) return alert("User not authenticated");
+    if (!booking.showtimeId) return alert("No showtime selected");
+    if (booking.selectedSeats.length === 0) return alert("No seats selected");
 
     setIsProcessing(true);
 
+    const orderId = `ORD-${uuidv4()}`;
+
     try {
+      // 1️⃣ Kirim data transaksi ke backend Laravel
       const payload = {
-        order_id: `ORD-${uuidv4()}`,
+        order_id: orderId,
         appuser_id: user.id,
         schedule_id: booking.showtimeId,
         seats: booking.selectedSeats,
@@ -98,9 +113,6 @@ function Payment() {
         status: "pending",
       };
 
-      console.log("Submitting payload:", payload);
-
-      // Kirim data transaksi ke endpoint utama
       const response = await axios.post(API_ENDPOINT, payload, {
         headers: {
           "Content-Type": "application/json",
@@ -108,25 +120,46 @@ function Payment() {
         },
       });
 
-      if (response.status === 200 || response.status === 201) {
-        // Perbarui data kursi menggunakan PUT
-        await Promise.all(
-          booking.selectedSeats.map((seat) =>
-            axios.put(`http://127.0.0.1:8000/api/dashboard/seats/${seat}`, {
-              schedule_id: booking.showtimeId,
-              seat_code: seat, // Tambahkan seat_code
-              is_booked: true,
-            })
-          )
-        );
+      const snapToken = response.data.snap_token;
 
-        alert("Payment and seat booking successful!");
-        navigate("/success", { state: { orderId: payload.order_id } });
+      // 2️⃣ Panggil Snap Midtrans
+      if (window.snap) {
+        window.snap.pay(snapToken, {
+          onSuccess: async (result) => {
+            console.log("Success:", result);
+
+            // 3️⃣ Tandai kursi sebagai sudah dibooking
+            await Promise.all(
+              booking.selectedSeats.map((seat) =>
+                axios.put(`http://127.0.0.1:8000/api/dashboard/seats/${seat}`, {
+                  schedule_id: booking.showtimeId,
+                  seat_code: seat,
+                  is_booked: true,
+                })
+              )
+            );
+
+            navigate("/success", { state: { orderId } });
+          },
+          onPending: (result) => {
+            console.log("Pending:", result);
+            alert("Transaction pending. Please complete the payment.");
+          },
+          onError: (error) => {
+            console.error("Payment failed:", error);
+            alert("Payment failed. Please try again.");
+          },
+          onClose: () => {
+            console.log("Payment popup closed");
+            alert("You closed the payment popup without finishing.");
+          },
+        });
+      } else {
+        alert("Midtrans snap.js not loaded");
       }
     } catch (error) {
       console.error("Payment error:", error);
       if (axios.isAxiosError(error) && error.response) {
-        console.error("Server response:", error.response.data);
         alert(
           `Payment failed: ${error.response.data.message || "Unknown error"}`
         );
@@ -138,6 +171,7 @@ function Payment() {
     }
   }
 
+  // 🛡️ Autentikasi loading
   if (!authChecked || !isAuthenticated) {
     return (
       <div className="flex items-center justify-center h-screen">
@@ -165,7 +199,7 @@ function Payment() {
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-        {/* Order Summary */}
+        {/* 🎟️ Ringkasan Pesanan */}
         <div className="bg-gray-50 rounded-xl p-6">
           <h2 className="text-xl font-semibold mb-4">Order Summary</h2>
 
@@ -216,7 +250,7 @@ function Payment() {
           </div>
         </div>
 
-        {/* Payment Methods */}
+        {/* 💳 Pilihan Pembayaran */}
         <div>
           <h2 className="text-xl font-semibold mb-4">Payment Method</h2>
 
