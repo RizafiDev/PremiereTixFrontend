@@ -6,9 +6,9 @@ import { Cinema } from "@/services/scheduleService";
 export interface BookingData {
   film: Film | null;
   cinema: Cinema | null;
-  showtimeId: number | null;
-  showtimeTime: string | null; // Format: "2025-04-15 15:30:00"
-  showDate: string | null; // Format: "YYYY-MM-DD"
+  showtimeId: number | null; // This corresponds to schedule_id in DB
+  showtimeTime: string | null;
+  showDate: string | null;
   studio: string | null;
   price: number | null;
   selectedSeats: string[];
@@ -44,28 +44,24 @@ export const useBookingStore = create<BookingStore>()(
           booking: { ...state.booking, ...data },
         })),
       setSelectedSeats: (seats) =>
-        set((state) => {
-          const booking = {
+        set((state) => ({
+          booking: {
             ...state.booking,
             selectedSeats: seats,
             totalPrice: seats.length * (state.booking.price || 0),
-          };
-          return { booking };
-        }),
+          },
+        })),
       addSeat: (seat) =>
         set((state) => {
           if (state.booking.selectedSeats.includes(seat)) {
             return state;
           }
-
           const selectedSeats = [...state.booking.selectedSeats, seat];
-          const totalPrice = selectedSeats.length * (state.booking.price || 0);
-
           return {
             booking: {
               ...state.booking,
               selectedSeats,
-              totalPrice,
+              totalPrice: selectedSeats.length * (state.booking.price || 0),
             },
           };
         }),
@@ -74,13 +70,11 @@ export const useBookingStore = create<BookingStore>()(
           const selectedSeats = state.booking.selectedSeats.filter(
             (s) => s !== seat
           );
-          const totalPrice = selectedSeats.length * (state.booking.price || 0);
-
           return {
             booking: {
               ...state.booking,
               selectedSeats,
-              totalPrice,
+              totalPrice: selectedSeats.length * (state.booking.price || 0),
             },
           };
         }),
@@ -108,7 +102,7 @@ export const useBookingStore = create<BookingStore>()(
         }),
     }),
     {
-      name: "booking-storage", // name for localStorage key
+      name: "booking-storage",
     }
   )
 );

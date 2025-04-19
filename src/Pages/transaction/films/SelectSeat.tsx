@@ -5,7 +5,7 @@ import {
 import { useNavigate } from "react-router-dom";
 import { useEffect, useState } from "react";
 import clsx from "clsx";
-import { useBookingStore } from "@/stores/useBookingStore"; // Adjust path as needed
+import { useBookingStore } from "@/stores/useBookingStore";
 import { getSeatsBySchedule, Seat } from "@/services/scheduleService";
 import { useAuthStore } from "@/stores/useAuthStore";
 import dayjs from "dayjs";
@@ -79,14 +79,14 @@ function SelectSeat() {
       return;
     }
 
-    // Load booked seats from API
+    // Function to load booked seats from API
     const loadBookedSeats = async () => {
       try {
         setIsLoading(true);
         const seats = await getSeatsBySchedule(booking.showtimeId!);
         const booked = seats
-          .filter((seat: Seat) => seat.status === "booked")
-          .map((seat: Seat) => seat.seat_number);
+          .filter((seat: Seat) => seat.is_booked)
+          .map((seat: Seat) => seat.seat_code);
         setBookedSeats(booked);
       } catch (error) {
         console.error("Failed to load seat data", error);
@@ -95,7 +95,19 @@ function SelectSeat() {
       }
     };
 
+    // Load seats on component mount
     loadBookedSeats();
+
+    // Set up session timeout for 2 minutes
+    const sessionTimeout = setTimeout(() => {
+      alert(
+        "Sesi Anda telah berakhir. Anda akan diarahkan kembali ke halaman pembelian."
+      );
+      navigate("/buy");
+    }, 2 * 60 * 1000); // 2 menit dalam milidetik
+
+    // Cleanup timeout on component unmount
+    return () => clearTimeout(sessionTimeout);
   }, [booking.showtimeId, navigate]);
 
   const toggleSeat = (seat: string) => {

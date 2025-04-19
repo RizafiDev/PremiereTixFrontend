@@ -23,8 +23,8 @@ export interface Schedule {
 export interface Seat {
   id: number;
   schedule_id: number;
-  seat_number: string;
-  status: "available" | "booked";
+  seat_code: string;
+  is_booked: boolean;
 }
 
 export const getSchedules = async (): Promise<Schedule[]> => {
@@ -48,9 +48,9 @@ export const getSeatsBySchedule = async (
   scheduleId: number
 ): Promise<Seat[]> => {
   try {
-    const response = await axios.get<{ data: Seat[] }>(
-      `${API_SEATS_URL}?schedule_id=${scheduleId}`
-    );
+    const response = await axios.get(API_SEATS_URL, {
+      params: { schedule_id: scheduleId },
+    });
     return response.data.data;
   } catch (error) {
     console.error("Error fetching seats:", error);
@@ -60,5 +60,5 @@ export const getSeatsBySchedule = async (
 
 export const isScheduleFull = async (scheduleId: number): Promise<boolean> => {
   const seats = await getSeatsBySchedule(scheduleId);
-  return seats.every((seat) => seat.status === "booked");
+  return seats.every((seat) => seat.is_booked);
 };

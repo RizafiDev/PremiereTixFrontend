@@ -197,6 +197,7 @@ function BuyTicket() {
       cinema,
       studio,
       price,
+      scheduleId: id, // Tambahkan scheduleId
     });
   };
 

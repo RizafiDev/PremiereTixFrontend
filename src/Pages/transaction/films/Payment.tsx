@@ -2,11 +2,13 @@ import { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useBookingStore } from "@/stores/useBookingStore";
 import { useAuthStore } from "@/stores/useAuthStore";
+import { v4 as uuidv4 } from "uuid";
 import {
   ArrowLeftCircleIcon as BackIcon,
   WalletIcon,
 } from "@heroicons/react/24/outline";
 import dayjs from "dayjs";
+import axios from "axios";
 
 function PaymentMethod({
   icon,
@@ -40,12 +42,15 @@ function formatCurrency(amount: number): string {
   }).format(amount);
 }
 
+const API_ENDPOINT = "http://127.0.0.1:8000/api/dashboard/ticket-transactions";
+
 function Payment() {
   const navigate = useNavigate();
   const { booking } = useBookingStore();
-  const { isAuthenticated, initialize } = useAuthStore();
+  const { isAuthenticated, initialize, user } = useAuthStore();
   const [selectedMethod, setSelectedMethod] = useState("midtrans");
   const [authChecked, setAuthChecked] = useState(false);
+  const [isProcessing, setIsProcessing] = useState(false);
 
   useEffect(() => {
     const init = async () => {
@@ -64,6 +69,74 @@ function Payment() {
       grandTotal: amount + fee,
     };
   }, [booking.selectedSeats.length, booking.price]);
+
+  async function handlePayment() {
+    if (!user?.id) {
+      alert("User not authenticated");
+      return;
+    }
+
+    if (!booking.showtimeId) {
+      alert("No showtime selected");
+      return;
+    }
+
+    if (booking.selectedSeats.length === 0) {
+      alert("No seats selected");
+      return;
+    }
+
+    setIsProcessing(true);
+
+    try {
+      const payload = {
+        order_id: `ORD-${uuidv4()}`,
+        appuser_id: user.id,
+        schedule_id: booking.showtimeId,
+        seats: booking.selectedSeats,
+        gross_amount: grandTotal,
+        status: "pending",
+      };
+
+      console.log("Submitting payload:", payload);
+
+      // Kirim data transaksi ke endpoint utama
+      const response = await axios.post(API_ENDPOINT, payload, {
+        headers: {
+          "Content-Type": "application/json",
+          Accept: "application/json",
+        },
+      });
+
+      if (response.status === 200 || response.status === 201) {
+        // Perbarui data kursi menggunakan PUT
+        await Promise.all(
+          booking.selectedSeats.map((seat) =>
+            axios.put(`http://127.0.0.1:8000/api/dashboard/seats/${seat}`, {
+              schedule_id: booking.showtimeId,
+              seat_code: seat, // Tambahkan seat_code
+              is_booked: true,
+            })
+          )
+        );
+
+        alert("Payment and seat booking successful!");
+        navigate("/success", { state: { orderId: payload.order_id } });
+      }
+    } catch (error) {
+      console.error("Payment error:", error);
+      if (axios.isAxiosError(error) && error.response) {
+        console.error("Server response:", error.response.data);
+        alert(
+          `Payment failed: ${error.response.data.message || "Unknown error"}`
+        );
+      } else {
+        alert("An error occurred during payment. Please try again.");
+      }
+    } finally {
+      setIsProcessing(false);
+    }
+  }
 
   if (!authChecked || !isAuthenticated) {
     return (
@@ -157,10 +230,18 @@ function Payment() {
           </div>
 
           <button
-            onClick={() => alert("Implement payment logic here")}
-            className="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-4 rounded-lg transition-colors"
+            onClick={handlePayment}
+            disabled={isProcessing}
+            className="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-4 rounded-lg transition-colors disabled:bg-blue-400"
           >
-            Pay {formatCurrency(grandTotal)}
+            {isProcessing ? (
+              <div className="flex items-center justify-center gap-2">
+                <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white"></div>
+                Processing...
+              </div>
+            ) : (
+              `Pay ${formatCurrency(grandTotal)}`
+            )}
           </button>
         </div>
       </div>
