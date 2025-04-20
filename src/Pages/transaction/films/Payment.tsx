@@ -7,11 +7,12 @@ import { v4 as uuidv4 } from "uuid";
 import {
   ArrowLeftCircleIcon as BackIcon,
   WalletIcon,
+  ClockIcon,
 } from "@heroicons/react/24/outline";
 import dayjs from "dayjs";
 import axios from "axios";
+import { Dialog } from "@headlessui/react";
 
-// ✅ Deklarasi Midtrans snap supaya tidak error di TypeScript
 declare global {
   interface Window {
     snap: {
@@ -28,7 +29,6 @@ declare global {
   }
 }
 
-// 💳 Komponen metode pembayaran
 function PaymentMethod({
   icon,
   name,
@@ -53,7 +53,6 @@ function PaymentMethod({
   );
 }
 
-// 💰 Format currency Indonesia
 function formatCurrency(amount: number): string {
   return new Intl.NumberFormat("id-ID", {
     style: "currency",
@@ -62,7 +61,6 @@ function formatCurrency(amount: number): string {
   }).format(amount);
 }
 
-// ✅ Endpoint transaksi Laravel API
 const API_ENDPOINT = "http://127.0.0.1:8000/api/dashboard/ticket-transactions";
 
 function Payment() {
@@ -72,6 +70,10 @@ function Payment() {
   const [selectedMethod, setSelectedMethod] = useState("midtrans");
   const [authChecked, setAuthChecked] = useState(false);
   const [isProcessing, setIsProcessing] = useState(false);
+  const [expiryTime, setExpiryTime] = useState<dayjs.Dayjs | null>(null);
+  const [remainingTime, setRemainingTime] = useState<string>("");
+  const [isExpired, setIsExpired] = useState(false);
+  const [showExpiredModal, setShowExpiredModal] = useState(false);
 
   useEffect(() => {
     const init = async () => {
@@ -81,7 +83,39 @@ function Payment() {
     init();
   }, [initialize]);
 
-  // 💵 Hitung total harga & fee
+  useEffect(() => {
+    let interval: NodeJS.Timeout;
+
+    if (expiryTime) {
+      const updateCountdown = () => {
+        const now = dayjs();
+        const diff = expiryTime.diff(now, "second");
+
+        if (diff <= 0) {
+          setIsExpired(true);
+          setShowExpiredModal(true);
+          setRemainingTime("00:00:00");
+          clearInterval(interval);
+          return;
+        }
+
+        const hours = Math.floor(diff / 3600);
+        const minutes = Math.floor((diff % 3600) / 60);
+        const seconds = diff % 60;
+        setRemainingTime(
+          `${hours.toString().padStart(2, "0")}:${minutes
+            .toString()
+            .padStart(2, "0")}:${seconds.toString().padStart(2, "0")}`
+        );
+      };
+
+      updateCountdown();
+      interval = setInterval(updateCountdown, 1000);
+    }
+
+    return () => clearInterval(interval);
+  }, [expiryTime]);
+
   const { totalAmount, serviceFee, grandTotal } = useMemo(() => {
     const amount = booking.selectedSeats.length * (booking.price || 0);
     const fee = Math.round(amount * 0.05);
@@ -92,18 +126,17 @@ function Payment() {
     };
   }, [booking.selectedSeats.length, booking.price]);
 
-  // 🧾 Fungsi pembayaran
   async function handlePayment() {
     if (!user?.id) return alert("User not authenticated");
     if (!booking.showtimeId) return alert("No showtime selected");
     if (booking.selectedSeats.length === 0) return alert("No seats selected");
+    if (isExpired) return setShowExpiredModal(true);
 
     setIsProcessing(true);
 
     const orderId = `ORD-${uuidv4()}`;
 
     try {
-      // 1️⃣ Kirim data transaksi ke backend Laravel
       const payload = {
         order_id: orderId,
         appuser_id: user.id,
@@ -119,16 +152,20 @@ function Payment() {
           Accept: "application/json",
         },
       });
+
       const transactionId = response.data.data.id;
       const snapToken = response.data.snap_token;
+      const expiresAt = response.data.data.expires_at;
 
-      // 2️⃣ Panggil Snap Midtrans
+      // Set expiry time from API response
+      setExpiryTime(dayjs(expiresAt));
+      setIsExpired(false);
+
       if (window.snap) {
         window.snap.pay(snapToken, {
           onSuccess: async (result) => {
             console.log("Success:", result);
 
-            // 3️⃣ Tandai kursi sebagai sudah dibooking
             await Promise.all(
               booking.selectedSeats.map((seat) =>
                 axios.put(`http://127.0.0.1:8000/api/dashboard/seats/${seat}`, {
@@ -138,7 +175,7 @@ function Payment() {
                 })
               )
             );
-            // ✅ Update status transaksi menjadi 'success'
+
             await axios.put(
               `http://127.0.0.1:8000/api/dashboard/ticket-transactions/${transactionId}`,
               {
@@ -178,7 +215,6 @@ function Payment() {
     }
   }
 
-  // 🛡️ Autentikasi loading
   if (!authChecked || !isAuthenticated) {
     return (
       <div className="flex items-center justify-center h-screen">
@@ -197,6 +233,38 @@ function Payment() {
 
   return (
     <div className="container mx-auto px-6 py-8 max-w-4xl">
+      {/* Expired Payment Modal */}
+      <Dialog
+        open={showExpiredModal}
+        onClose={() => setShowExpiredModal(false)}
+        className="relative z-50"
+      >
+        <div className="fixed inset-0 bg-black/30" aria-hidden="true" />
+        <div className="fixed inset-0 flex items-center justify-center p-4">
+          <Dialog.Panel className="w-full max-w-md rounded-lg bg-white p-6">
+            <Dialog.Title className="text-xl font-bold text-red-600">
+              Payment Expired
+            </Dialog.Title>
+            <Dialog.Description className="mt-2 text-gray-600">
+              Your payment time has expired. Please try again to complete your
+              booking.
+            </Dialog.Description>
+
+            <div className="mt-4 flex justify-end gap-3">
+              <button
+                onClick={() => {
+                  setShowExpiredModal(false);
+                  navigate("/select-seat");
+                }}
+                className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700"
+              >
+                Try Again
+              </button>
+            </div>
+          </Dialog.Panel>
+        </div>
+      </Dialog>
+
       <div className="flex items-center gap-4 mb-8">
         <BackIcon
           className="w-8 h-8 cursor-pointer"
@@ -206,7 +274,7 @@ function Payment() {
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-        {/* 🎟️ Ringkasan Pesanan */}
+        {/* Order Summary */}
         <div className="bg-gray-50 rounded-xl p-6">
           <h2 className="text-xl font-semibold mb-4">Order Summary</h2>
 
@@ -257,9 +325,19 @@ function Payment() {
           </div>
         </div>
 
-        {/* 💳 Pilihan Pembayaran */}
+        {/* Payment Method */}
         <div>
           <h2 className="text-xl font-semibold mb-4">Payment Method</h2>
+
+          {expiryTime && (
+            <div className="mb-4 p-3 bg-yellow-50 border border-yellow-200 rounded-lg flex items-center gap-2">
+              <ClockIcon className="w-5 h-5 text-yellow-600" />
+              <span className="font-medium text-yellow-800">
+                Complete payment in:{" "}
+                <span className="text-red-600">{remainingTime}</span>
+              </span>
+            </div>
+          )}
 
           <div className="space-y-3 mb-6">
             <PaymentMethod
@@ -272,7 +350,7 @@ function Payment() {
 
           <button
             onClick={handlePayment}
-            disabled={isProcessing}
+            disabled={isProcessing || isExpired}
             className="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-4 rounded-lg transition-colors disabled:bg-blue-400"
           >
             {isProcessing ? (
@@ -280,6 +358,8 @@ function Payment() {
                 <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white"></div>
                 Processing...
               </div>
+            ) : isExpired ? (
+              "Payment Expired"
             ) : (
               `Pay ${formatCurrency(grandTotal)}`
             )}
