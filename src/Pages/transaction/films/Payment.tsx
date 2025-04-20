@@ -119,7 +119,7 @@ function Payment() {
           Accept: "application/json",
         },
       });
-
+      const transactionId = response.data.data.id;
       const snapToken = response.data.snap_token;
 
       // 2️⃣ Panggil Snap Midtrans
@@ -137,6 +137,13 @@ function Payment() {
                   is_booked: true,
                 })
               )
+            );
+            // ✅ Update status transaksi menjadi 'success'
+            await axios.put(
+              `http://127.0.0.1:8000/api/dashboard/ticket-transactions/${transactionId}`,
+              {
+                status: "success",
+              }
             );
 
             navigate("/success", { state: { orderId } });
