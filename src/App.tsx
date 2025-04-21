@@ -9,6 +9,7 @@ import Payment from "./Pages/transaction/films/Payment";
 import { AuthInitializer } from "@/components/AuthInitializer";
 import { ProtectedRoute } from "@/components/ProtectedRoute";
 import PaymentSuccess from "./Pages/transaction/films/PaymentSucces";
+import TicketScanner from "./Pages/scanner/TicketScanner";
 
 function App() {
   return (
@@ -27,7 +28,10 @@ function App() {
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
 
-          {/* public transaction routes */}
+          {/* feature */}
+          <Route path="/scanner" element={<TicketScanner />} />
+
+          {/* routes that don't need authentication check */}
 
           {/* routes that need authentication check */}
 

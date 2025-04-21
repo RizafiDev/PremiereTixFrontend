@@ -4,6 +4,7 @@ import { ArrowRightEndOnRectangleIcon as MasukIcon } from "@heroicons/react/24/o
 import { UserPlusIcon as DaftarIcon } from "@heroicons/react/24/outline";
 import Logo from "../../public/Premiere.svg";
 import { ArrowRightStartOnRectangleIcon as LogoutIcon } from "@heroicons/react/24/outline";
+import { ViewfinderCircleIcon as ScannerIcon } from "@heroicons/react/24/outline";
 import { QuestionMarkCircleIcon as HelpIcon } from "@heroicons/react/24/outline";
 import {
   DropdownMenu,
@@ -91,6 +92,15 @@ function Navbar() {
           /> */}
 
           <SelectRegion />
+          <div className="scan-my-ticket">
+            <button
+              onClick={() => navigate("/scanner")}
+              className="flex items-center gap-2 text-black cursor-pointer font-semibold border py-2 text-sm transition-all rounded-lg border-black px-5"
+            >
+              <ScannerIcon className="w-4 h-4" />
+              Scan Tiket Saya
+            </button>
+          </div>
         </div>
         {isLoggedIn ? (
           <DropdownMenu>
