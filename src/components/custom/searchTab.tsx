@@ -15,11 +15,12 @@ function SearchTab() {
   const inputRef = useRef<HTMLInputElement>(null);
 
   return (
-    <div className="relative w-full max-w-xl">
-      <Command className="border border-b-0 shadow-xs">
+    <div className="relative w-full max-w-xl ">
+      <Command className="border border-b-0 shadow-lg shadow-gray-200 rounded-full ">
         <CommandInput
+          className="font-medium"
           ref={inputRef}
-          placeholder="Search..."
+          placeholder="Mau cari film atau makanan?"
           onFocus={() => setIsOpen(true)}
           onBlur={() => setTimeout(() => setIsOpen(false))} // Delay untuk menghindari kehilangan fokus saat klik hasil
         />
@@ -38,10 +39,8 @@ function SearchTab() {
                   <CommandItem>No result found.</CommandItem>
                 </CommandGroup>
                 <CommandSeparator />
-                <CommandGroup heading="Settings">
-                  <CommandItem>Profile</CommandItem>
-                  <CommandItem>Billing</CommandItem>
-                  <CommandItem>Settings</CommandItem>
+                <CommandGroup heading="Makanan">
+                  <CommandItem>No result found.</CommandItem>
                 </CommandGroup>
               </CommandList>
             </motion.div>

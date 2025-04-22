@@ -28,12 +28,12 @@ const images = [
   },
 ];
 
-function Header() {
+function AdList() {
   return (
-    <header className="container mx-auto w-full">
-      <Carousel images={images} />
+    <header className="container mx-auto w-full px-48 py-4">
+      <Carousel images={images} transitionDuration={2000} />
     </header>
   );
 }
 
-export default Header;
+export default AdList;

@@ -1,8 +1,9 @@
 import { useEffect } from "react";
 import Navbar from "@/components/Navbar";
-import Header from "@/components/Header";
+import AdList from "@/components/AdList";
 import PlayingFilm from "@/components/PlayingFilm";
 import { useBookingStore } from "@/stores/useBookingStore"; // Import useBookingStore
+import QuickBar from "@/components/QuickBar";
 
 function Homepage() {
   const { resetBooking } = useBookingStore(); // Akses resetBooking dari Zustand store
@@ -13,11 +14,12 @@ function Homepage() {
   }, [resetBooking]); // Hanya dipanggil sekali saat komponen pertama kali render
 
   return (
-    <>
-      <Navbar />
-      <Header />
+    <div>
+      {/* <Navbar /> */}
+      <QuickBar />
+      <AdList />
       <PlayingFilm />
-    </>
+    </div>
   );
 }
 
