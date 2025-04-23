@@ -73,14 +73,14 @@ const Carousel: React.FC<CarouselProps> = ({
             <img
               src={image.src}
               alt={`Slide ${index}`}
-              className="w-full h-full object-cover object-center rounded-md"
+              className="w-full h-full object-cover object-center rounded-lg"
             />
           </div>
         ))}
       </div>
 
       {/* Dots Indicator */}
-      <div className="absolute bottom-2 left-1/2 transform -translate-x-1/2 flex space-x-2">
+      {/* <div className="absolute bottom-2 left-1/2 transform -translate-x-1/2 flex space-x-2">
         {Array.from({ length: maxIndex + 1 }).map((_, index) => (
           <div
             key={index}
@@ -89,7 +89,7 @@ const Carousel: React.FC<CarouselProps> = ({
             }`}
           />
         ))}
-      </div>
+      </div> */}
     </div>
   );
 };

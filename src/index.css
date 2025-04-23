@@ -10,7 +10,7 @@
 }
 
 body {
-  background: linear-gradient(135deg, white 70%, #d1f4fa 100%);
+  background: linear-gradient(135deg, white 30%, #d1f4fa 70%);
 }
 
 ::-webkit-scrollbar {

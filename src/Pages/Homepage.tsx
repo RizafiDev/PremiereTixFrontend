@@ -4,6 +4,7 @@ import AdList from "@/components/AdList";
 import PlayingFilm from "@/components/PlayingFilm";
 import { useBookingStore } from "@/stores/useBookingStore"; // Import useBookingStore
 import QuickBar from "@/components/QuickBar";
+import CouponBanner from "@/components/CouponBanner";
 
 function Homepage() {
   const { resetBooking } = useBookingStore(); // Akses resetBooking dari Zustand store
@@ -14,11 +15,12 @@ function Homepage() {
   }, [resetBooking]); // Hanya dipanggil sekali saat komponen pertama kali render
 
   return (
-    <div>
+    <div className="flex flex-col gap-10">
       {/* <Navbar /> */}
       <QuickBar />
       <AdList />
       <PlayingFilm />
+      <CouponBanner />
     </div>
   );
 }
