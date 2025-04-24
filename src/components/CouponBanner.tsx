@@ -12,19 +12,16 @@ import promo7 from "../../public/coupon/promo7.jpg";
 import promo8 from "../../public/coupon/promo8.jpg";
 import promo9 from "../../public/coupon/promo9.jpg";
 
-// Define the type for image imports
-type ImageImport = string;
-
-const promoImages: ImageImport[] = [
-  promo1,
-  promo2,
-  promo3,
-  promo4,
-  promo5,
-  promo6,
-  promo7,
-  promo8,
-  promo9,
+const promoImages = [
+  { src: promo1, title: "Promo 1", rating: 0 },
+  { src: promo2, title: "Promo 2", rating: 0 },
+  { src: promo3, title: "Promo 3", rating: 0 },
+  { src: promo4, title: "Promo 4", rating: 0 },
+  { src: promo5, title: "Promo 5", rating: 0 },
+  { src: promo6, title: "Promo 6", rating: 0 },
+  { src: promo7, title: "Promo 7", rating: 0 },
+  { src: promo8, title: "Promo 8", rating: 0 },
+  { src: promo9, title: "Promo 9", rating: 0 },
 ];
 
 const ITEMS_PER_VIEW = 3;
@@ -32,23 +29,16 @@ const SCROLL_INTERVAL = 4000; // ms
 const TRANSITION_DURATION = 500; // ms
 
 function CouponBanner(): React.ReactElement {
-  const [currentGroup, setCurrentGroup] = useState<number>(0);
+  const [activeIndex, setActiveIndex] = useState(0);
   const intervalRef = useRef<NodeJS.Timeout | null>(null);
-  const containerRef = useRef<HTMLDivElement | null>(null);
-
-  // Calculate how many complete groups we have
-  const totalGroups = Math.ceil(promoImages.length / ITEMS_PER_VIEW);
-
-  // Group promos into slides of 3
-  const groupedImages: ImageImport[][] = [];
-  for (let i = 0; i < promoImages.length; i += ITEMS_PER_VIEW) {
-    groupedImages.push(promoImages.slice(i, i + ITEMS_PER_VIEW));
-  }
+  const maxIndex = promoImages.length - ITEMS_PER_VIEW;
 
   // Auto scroll
   useEffect(() => {
     intervalRef.current = setInterval(() => {
-      setCurrentGroup((prev) => (prev + 1) % totalGroups);
+      setActiveIndex((prevIndex) =>
+        prevIndex >= maxIndex ? 0 : prevIndex + 1
+      );
     }, SCROLL_INTERVAL);
 
     return () => {
@@ -56,16 +46,7 @@ function CouponBanner(): React.ReactElement {
         clearInterval(intervalRef.current);
       }
     };
-  }, [totalGroups]);
-
-  // Apply transition when current group changes
-  useEffect(() => {
-    const container = containerRef.current;
-    if (container) {
-      container.style.transition = `transform ${TRANSITION_DURATION}ms ease-in-out`;
-      container.style.transform = `translateX(-${currentGroup * 100}%)`;
-    }
-  }, [currentGroup]);
+  }, [maxIndex]);
 
   const goToPrev = (): void => {
     // Reset the auto-scroll interval
@@ -73,11 +54,13 @@ function CouponBanner(): React.ReactElement {
       clearInterval(intervalRef.current);
     }
 
-    setCurrentGroup((prev) => (prev - 1 + totalGroups) % totalGroups);
+    setActiveIndex((prevIndex) => (prevIndex <= 0 ? maxIndex : prevIndex - 1));
 
     // Restart interval
     intervalRef.current = setInterval(() => {
-      setCurrentGroup((prev) => (prev + 1) % totalGroups);
+      setActiveIndex((prevIndex) =>
+        prevIndex >= maxIndex ? 0 : prevIndex + 1
+      );
     }, SCROLL_INTERVAL);
   };
 
@@ -87,11 +70,13 @@ function CouponBanner(): React.ReactElement {
       clearInterval(intervalRef.current);
     }
 
-    setCurrentGroup((prev) => (prev + 1) % totalGroups);
+    setActiveIndex((prevIndex) => (prevIndex >= maxIndex ? 0 : prevIndex + 1));
 
     // Restart interval
     intervalRef.current = setInterval(() => {
-      setCurrentGroup((prev) => (prev + 1) % totalGroups);
+      setActiveIndex((prevIndex) =>
+        prevIndex >= maxIndex ? 0 : prevIndex + 1
+      );
     }, SCROLL_INTERVAL);
   };
 
@@ -123,47 +108,45 @@ function CouponBanner(): React.ReactElement {
           <ChevronRight size={20} />
         </button>
 
-        {/* Carousel track */}
-        <div className="overflow-hidden">
-          <div
-            ref={containerRef}
-            className="flex"
-            style={{ width: `${totalGroups * 100}%` }}
-          >
-            {groupedImages.map((group, groupIdx) => (
-              <div
-                key={groupIdx}
-                className="w-full"
-                style={{ flex: `0 0 ${100 / totalGroups}%` }}
-              >
-                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 px-1">
-                  {group.map((img, imgIdx) => (
-                    <img
-                      key={`${groupIdx}-${imgIdx}`}
-                      src={img}
-                      className="rounded-xl w-full aspect-[3/1] object-cover shadow"
-                      alt={`promo-${groupIdx * ITEMS_PER_VIEW + imgIdx + 1}`}
-                    />
-                  ))}
-                </div>
-              </div>
-            ))}
-          </div>
+        {/* Carousel Container */}
+        <div
+          className="flex"
+          style={{
+            transform: `translateX(-${
+              (100 / promoImages.length) * activeIndex
+            }%)`,
+            transition: `transform ${TRANSITION_DURATION}ms ease-in-out`,
+            width: `${(100 / ITEMS_PER_VIEW) * promoImages.length}%`,
+          }}
+        >
+          {promoImages.map((image, index) => (
+            <div
+              key={index}
+              style={{ width: `${100 / promoImages.length}%` }}
+              className="flex-none px-1"
+            >
+              <img
+                src={image.src}
+                alt={image.title}
+                className="w-full aspect-[3/1] object-cover rounded-xl shadow"
+              />
+            </div>
+          ))}
         </div>
 
         {/* Pagination indicators */}
-        <div className="flex justify-center mt-4 gap-2">
-          {Array.from({ length: totalGroups }).map((_, idx) => (
+        {/* <div className="flex justify-center mt-4 gap-2">
+          {Array.from({ length: maxIndex + 1 }).map((_, idx) => (
             <button
               key={idx}
-              onClick={() => setCurrentGroup(idx)}
+              onClick={() => setActiveIndex(idx)}
               className={`w-2 h-2 rounded-full ${
-                currentGroup === idx ? "bg-blue-600" : "bg-gray-300"
+                activeIndex === idx ? "bg-blue-600" : "bg-gray-300"
               }`}
-              aria-label={`Go to slide group ${idx + 1}`}
+              aria-label={`Go to slide ${idx + 1}`}
             />
           ))}
-        </div>
+        </div> */}
       </div>
     </div>
   );

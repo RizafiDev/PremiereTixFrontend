@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import {
@@ -85,10 +85,16 @@ function Register() {
       if (response.status === 200 || response.status === 201) {
         const { token, user } = response.data;
 
-        // Gunakan store untuk login
+        // Optional: cek log biar aman
+        console.log("Login success:", { user, token });
+
+        // Simpan ke auth store
         login(user, token);
 
-        navigate("/");
+        // Delay sedikit untuk memastikan store update sebelum redirect
+        setTimeout(() => {
+          navigate("/");
+        }, 100);
       }
     } catch (error: any) {
       setErrorMessage(
@@ -199,7 +205,7 @@ function Register() {
           )}
         </button>
         <p className="text-xs text-gray-600 font-medium text-center">
-          Sudah memiliki akun??{" "}
+          Sudah memiliki akun?{" "}
           <span
             onClick={() => navigate("/login")}
             className="text-blue-600 cursor-pointer hover:underline"

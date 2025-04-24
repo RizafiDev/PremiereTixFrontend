@@ -5,6 +5,8 @@ import PlayingFilm from "@/components/PlayingFilm";
 import { useBookingStore } from "@/stores/useBookingStore"; // Import useBookingStore
 import QuickBar from "@/components/QuickBar";
 import CouponBanner from "@/components/CouponBanner";
+import FoodBanner from "@/components/FoodBanner";
+import StudioOverview from "@/components/StudioOverview";
 
 function Homepage() {
   const { resetBooking } = useBookingStore(); // Akses resetBooking dari Zustand store
@@ -21,6 +23,8 @@ function Homepage() {
       <AdList />
       <PlayingFilm />
       <CouponBanner />
+      <FoodBanner />
+      <StudioOverview />
     </div>
   );
 }
