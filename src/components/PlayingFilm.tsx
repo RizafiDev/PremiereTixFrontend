@@ -4,7 +4,7 @@ import FilmCatalog from "./custom/FilmCatalog";
 
 function PlayingFilm() {
   return (
-    <div className="container bg-transparent mx-auto px-48   text-textprimary flex flex-col  gap-8">
+    <div className="container bg-transparent mx-auto px-48   text-textprimary dark:text-white flex flex-col  gap-8">
       <div className="heading flex justify-between items-center">
         <div className="left flex flex-col items-start space-y-3">
           <h1 className="text-2xl font-bold">Sedang Tayang</h1>

@@ -81,7 +81,7 @@ function CouponBanner(): React.ReactElement {
   };
 
   return (
-    <div className="container mx-auto px-4 md:px-8 lg:px-16 xl:px-48 w-full relative">
+    <div className="container text-textprimary dark:text-white mx-auto px-4 md:px-8 lg:px-16 xl:px-48 w-full relative">
       {/* Header */}
       <div className="flex justify-between items-center mb-4">
         <h1 className="text-2xl font-bold">Mau pake promo?</h1>

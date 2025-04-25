@@ -7,6 +7,8 @@ import QuickBar from "@/components/QuickBar";
 import CouponBanner from "@/components/CouponBanner";
 import FoodBanner from "@/components/FoodBanner";
 import StudioOverview from "@/components/StudioOverview";
+import AppsBanner from "@/components/AppsBanner";
+import Footer from "@/components/Footer";
 
 function Homepage() {
   const { resetBooking } = useBookingStore(); // Akses resetBooking dari Zustand store
@@ -17,14 +19,16 @@ function Homepage() {
   }, [resetBooking]); // Hanya dipanggil sekali saat komponen pertama kali render
 
   return (
-    <div className="flex flex-col gap-10">
-      {/* <Navbar /> */}
+    <div className="flex flex-col gap-10 container mx-auto w-full dark:bg-gradient-to-br dark:from-black dark:to-[#003b43]">
+      <Navbar />
       <QuickBar />
       <AdList />
       <PlayingFilm />
       <CouponBanner />
       <FoodBanner />
       <StudioOverview />
+      <AppsBanner />
+      <Footer />
     </div>
   );
 }

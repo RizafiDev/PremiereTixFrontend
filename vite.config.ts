@@ -17,6 +17,7 @@ export default defineConfig({
       },
     }, // This closing brace was missing
   },
+
   plugins: [react(), tailwindcss()],
   resolve: {
     alias: {

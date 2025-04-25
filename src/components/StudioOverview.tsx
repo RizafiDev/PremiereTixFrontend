@@ -4,7 +4,7 @@ import Theater3 from "../../public/theater/t3.jpg";
 
 function StudioOverview() {
   return (
-    <div className="container mx-auto px-4 md:px-8 lg:px-16 xl:px-48 w-full relative">
+    <div className="container mx-auto px-4 md:px-8 lg:px-16 xl:px-48 w-full relative text-textprimary dark:text-white">
       <div className="header flex  items-center mb-4">
         <h1 className="text-2xl font-bold">Tentang studio kami</h1>
       </div>

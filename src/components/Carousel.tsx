@@ -1,5 +1,5 @@
 import { useRef, useEffect, useState } from "react";
-import { ChevronLeft, ChevronRight } from "lucide-react";
+// import { ChevronLeft, ChevronRight } from "lucide-react";
 
 interface CarouselProps {
   images: { src: string; title: string; rating: number }[];
@@ -28,13 +28,13 @@ const Carousel: React.FC<CarouselProps> = ({
     };
   }, [maxIndex]);
 
-  const goToPrev = () => {
-    setActiveIndex((prevIndex) => (prevIndex <= 0 ? maxIndex : prevIndex - 1));
-  };
+  // const goToPrev = () => {
+  //   setActiveIndex((prevIndex) => (prevIndex <= 0 ? maxIndex : prevIndex - 1));
+  // };
 
-  const goToNext = () => {
-    setActiveIndex((prevIndex) => (prevIndex >= maxIndex ? 0 : prevIndex + 1));
-  };
+  // const goToNext = () => {
+  //   setActiveIndex((prevIndex) => (prevIndex >= maxIndex ? 0 : prevIndex + 1));
+  // };
 
   return (
     <div
@@ -42,7 +42,7 @@ const Carousel: React.FC<CarouselProps> = ({
       style={{ height: "140px" }}
     >
       {/* Arrow Buttons */}
-      <button
+      {/* <button
         onClick={goToPrev}
         className="absolute left-2 top-1/2 -translate-y-1/2 z-10 bg-black/40 hover:bg-black/70 text-white rounded-full p-2"
       >
@@ -53,7 +53,7 @@ const Carousel: React.FC<CarouselProps> = ({
         className="absolute right-2 top-1/2 -translate-y-1/2 z-10 bg-black/40 hover:bg-black/70 text-white rounded-full p-2"
       >
         <ChevronRight size={20} />
-      </button>
+      </button> */}
 
       {/* Carousel Container */}
       <div

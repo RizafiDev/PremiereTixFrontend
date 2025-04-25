@@ -15,10 +15,10 @@ function SearchTab() {
   const inputRef = useRef<HTMLInputElement>(null);
 
   return (
-    <div className="relative w-full max-w-xl ">
-      <Command className="border border-b-0 shadow-lg shadow-gray-200 rounded-full ">
+    <div className="relative w-full max-w-lg ">
+      <Command className="border border-b-0 shadow-lg shadow-gray-200 dark:shadow-none dark:bg-zinc-800 rounded-full ">
         <CommandInput
-          className="font-medium"
+          className="font-medium text-sm"
           ref={inputRef}
           placeholder="Mau cari film atau makanan?"
           onFocus={() => setIsOpen(true)}
@@ -33,7 +33,7 @@ function SearchTab() {
               transition={{ duration: 0.2, ease: "easeOut" }}
               className="absolute left-0 right-0  rounded-lg z-10"
             >
-              <CommandList className="absolute left-0 right-0 top-15 bg-white border border-gray-200 shadow-md rounded-lg z-10">
+              <CommandList className="absolute left-0 right-0 top-15 bg-white border dark:bg-black border-gray-200 shadow-md rounded-lg z-10">
                 <CommandEmpty>No results found.</CommandEmpty>
                 <CommandGroup heading="Films">
                   <CommandItem>No result found.</CommandItem>

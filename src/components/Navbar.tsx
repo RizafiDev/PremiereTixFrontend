@@ -1,11 +1,11 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { ArrowRightEndOnRectangleIcon as MasukIcon } from "@heroicons/react/24/outline";
-import { UserPlusIcon as DaftarIcon } from "@heroicons/react/24/outline";
 import Logo from "../../public/Premiere.svg";
-import { ArrowRightStartOnRectangleIcon as LogoutIcon } from "@heroicons/react/24/outline";
-import { ViewfinderCircleIcon as ScannerIcon } from "@heroicons/react/24/outline";
-import { QuestionMarkCircleIcon as HelpIcon } from "@heroicons/react/24/outline";
+import LogoColor from "../../public/PremiereColor.svg";
+import { MapPinIcon as Map } from "@heroicons/react/24/solid";
+import Avatar from "./custom/avatar";
+import { useTheme } from "@/context/ThemeContext";
+import { MoonIcon, SunIcon } from "@heroicons/react/24/solid";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -25,15 +25,34 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
-import SelectRegion from "./custom/selectRegion";
+import {
+  FilmIcon as Film,
+  BuildingLibraryIcon as Cinema,
+  CakeIcon as Cake,
+  ReceiptPercentIcon as Promo,
+  ViewfinderCircleIcon as Scanner,
+} from "@heroicons/react/24/outline";
 import SearchTab from "./custom/searchTab";
-import Avatar from "./custom/avatar";
 
 function Navbar() {
   const navigate = useNavigate();
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [userName, setUserName] = useState("");
   const [userEmail, setUserEmail] = useState("");
+  const [isScrolled, setIsScrolled] = useState(false);
+  const { isDark, toggleTheme } = useTheme();
+
+  useEffect(() => {
+    const handleScroll = () => {
+      const scrollTop = window.scrollY;
+      setIsScrolled(scrollTop > 160);
+    };
+
+    window.addEventListener("scroll", handleScroll);
+    return () => {
+      window.removeEventListener("scroll", handleScroll);
+    };
+  }, []);
 
   // Cek status login saat komponen di-render
   useEffect(() => {
@@ -77,107 +96,146 @@ function Navbar() {
   };
 
   return (
-    <nav className="container  z-50 backdrop-blur-xl backdrop-brightness-50 shadow-sm bg-white flex items-center w-full mx-auto my-auto justify-between pl-5 pr-7">
-      <div className="brand">
-        <img src={Logo} alt="" className="w-36" />
+    <div
+      className={`container mx-auto w-full flex fixed z-[999] items-center px-8 text-textprimary dark:text-white flex-col transition-colors duration-400 ${
+        isScrolled
+          ? "bg-white/80 backdrop-blur-xs dark:bg-black/80"
+          : "bg-transparent"
+      }`}
+    >
+      <div className="navbar flex items-center justify-between w-full py-3">
+        <div className="left flex items-center gap-8">
+          <img src={Logo} alt="" className="w-26 dark:hidden flex" />
+          <img src={LogoColor} alt="" className="w-26 dark:flex hidden" />
+          <button className="flex h-fit items-center gap-3 bg-zinc-100 dark:bg-zinc-800 rounded-full py-1 px-4">
+            <Map className="size-4" />{" "}
+            <span className="font-bold text-sm">JAKARTA</span>
+          </button>
+        </div>
+        <div className="right flex items-center gap-4">
+          <button
+            onClick={toggleTheme}
+            className="flex items-center justify-center w-9 h-9 rounded-full transition-all duration-300 bg-muted text-muted-foreground hover:scale-110 dark:bg-muted dark:text-muted-foreground shadow"
+            aria-label="Toggle theme"
+          >
+            {isDark ? (
+              <SunIcon className="size-5 text-yellow-400 transition-opacity duration-300" />
+            ) : (
+              <MoonIcon className="size-5 text-indigo-600 transition-opacity duration-300" />
+            )}
+          </button>
+          {/* login */}
+          {isLoggedIn ? (
+            <DropdownMenu>
+              <DropdownMenuTrigger>
+                <Avatar />
+              </DropdownMenuTrigger>
+              <DropdownMenuContent className="absolute -right-5 top-2">
+                <div className="information -space-y-2 flex flex-col pr-8">
+                  <DropdownMenuLabel className="font-semibold text-xs">
+                    Hello, {userName}
+                  </DropdownMenuLabel>
+                  <DropdownMenuLabel className="font-medium text-xs">
+                    {userEmail}
+                  </DropdownMenuLabel>
+                </div>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem className="text-xs font-medium">
+                  Profile
+                </DropdownMenuItem>
+                <DropdownMenuItem className="text-xs font-medium">
+                  My Ticket
+                </DropdownMenuItem>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem
+                  className="text-red-500 hover:text-red-600 text-xs font-medium"
+                  onClick={(e) => e.preventDefault()} // Tambahkan ini
+                >
+                  <AlertDialog>
+                    <AlertDialogTrigger
+                      className="flex items-center gap-2"
+                      onClick={(e) => e.stopPropagation()} // Tambahkan ini
+                    >
+                      Sign Out
+                    </AlertDialogTrigger>
+                    <AlertDialogContent>
+                      <AlertDialogHeader>
+                        <AlertDialogTitle>
+                          Apakah kamu benar-benar ingin keluar?
+                        </AlertDialogTitle>
+                        <AlertDialogDescription>
+                          Keluar dari akun akan menghapus semua data yang
+                          tersimpan di perangkat ini.
+                        </AlertDialogDescription>
+                      </AlertDialogHeader>
+                      <AlertDialogFooter>
+                        <AlertDialogCancel>Kembali</AlertDialogCancel>
+                        <AlertDialogAction
+                          onClick={handleLogout}
+                          className="bg-red-500 hover:bg-red-600 text-white"
+                        >
+                          Ya, saya yakin
+                        </AlertDialogAction>
+                      </AlertDialogFooter>
+                    </AlertDialogContent>
+                  </AlertDialog>
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          ) : (
+            <>
+              <button
+                onClick={() => navigate("/login")}
+                className="text-sm font-semibold cursor-pointer"
+              >
+                Login
+              </button>
+              <button
+                onClick={() => navigate("/register")}
+                className="text-sm font-semibold bg-textsecondary dark:text-black py-2 px-4 rounded-full text-white cursor-pointer "
+              >
+                Registration
+              </button>
+            </>
+          )}
+        </div>
       </div>
-      <SearchTab />
-      <div className="profile flex items-center space-x-5">
-        <div className="search relative flex items-center">
-          {/* <MagnifyingGlassIcon className="h-4 w-4 absolute left-3 text-black" />
-          <input
-            type="text"
-            placeholder="Cari Film"
-            className="outline-2 focus:outline-black w-[300px] transition-all text-black outline-black placeholder:text-black rounded-sm pt-2 pb-2 px-1.5 pl-9.5 truncate flex font-semibold text-sm"
-          /> */}
+      <div
+        className={`sub-navbar w-full  items-center justify-between py-6 transition-opacity duration-100 ${
+          isScrolled ? "flex opacity-100" : "pointer-events-none opacity-0"
+        }`}
+      >
+        <div className="bar w-full flex items-center ">
+          <SearchTab />
+        </div>
 
-          <SelectRegion />
-          <div className="scan-my-ticket">
-            <button
-              onClick={() => navigate("/scanner")}
-              className="flex items-center gap-2 text-black cursor-pointer font-semibold border py-2 text-sm transition-all rounded-lg border-black px-5"
-            >
-              <ScannerIcon className="w-4 h-4" />
-              Scan Tiket Saya
-            </button>
+        <div className="category flex items-center gap-12 w-full justify-end">
+          <div className="film flex  items-center gap-2">
+            <Film className="size-6 text-blue-600 truncate m-0  p-0" />
+            <p className="text-xs font-semibold">Film</p>
+          </div>
+          <div className="food flex l items-center gap-2">
+            <Cake className="size-6 text-yellow-600 truncate m-0  p-0" />
+            <p className="text-xs font-semibold">Food</p>
+          </div>
+          <div className="cinema flex  items-center gap-2">
+            <Cinema className="size-6 text-green-600 truncate m-0  p-0" />
+            <p className="text-xs font-semibold">Cinema</p>
+          </div>
+          <div className="Promo flex l items-center gap-2">
+            <Promo className="size-6 text-red-600 truncate m-0  p-0" />
+            <p className="text-xs font-semibold">Promo</p>
+          </div>
+          <div
+            onClick={() => navigate("/scanner")}
+            className="scan flex  items-center gap-2"
+          >
+            <Scanner className="size-6 text-violet-600 truncate m-0  p-0" />
+            <p className="text-xs font-semibold">Scan QR</p>
           </div>
         </div>
-        {isLoggedIn ? (
-          <DropdownMenu>
-            <DropdownMenuTrigger>
-              <Avatar />
-            </DropdownMenuTrigger>
-            <DropdownMenuContent>
-              <div className="information -space-y-2 flex flex-col pr-8">
-                <DropdownMenuLabel className="font-semibold text-md">
-                  Hello, {userName}
-                </DropdownMenuLabel>
-                <DropdownMenuLabel className="font-normal">
-                  {userEmail}
-                </DropdownMenuLabel>
-              </div>
-              <DropdownMenuSeparator />
-              <DropdownMenuItem>Profile</DropdownMenuItem>
-              <DropdownMenuItem>My Ticket</DropdownMenuItem>
-              <DropdownMenuSeparator />
-              <DropdownMenuItem
-                className="text-red-500 hover:text-red-600"
-                onClick={(e) => e.preventDefault()} // Tambahkan ini
-              >
-                <AlertDialog>
-                  <AlertDialogTrigger
-                    className="flex items-center gap-2"
-                    onClick={(e) => e.stopPropagation()} // Tambahkan ini
-                  >
-                    <LogoutIcon className="text-red-500 hover:text-red-600" />
-                    Keluar
-                  </AlertDialogTrigger>
-                  <AlertDialogContent>
-                    <AlertDialogHeader>
-                      <AlertDialogTitle>
-                        Apakah kamu benar-benar ingin keluar?
-                      </AlertDialogTitle>
-                      <AlertDialogDescription>
-                        Keluar dari akun akan menghapus semua data yang
-                        tersimpan di perangkat ini.
-                      </AlertDialogDescription>
-                    </AlertDialogHeader>
-                    <AlertDialogFooter>
-                      <AlertDialogCancel>Kembali</AlertDialogCancel>
-                      <AlertDialogAction
-                        onClick={handleLogout}
-                        className="bg-red-500 hover:bg-red-600 text-white"
-                      >
-                        Ya, saya yakin
-                      </AlertDialogAction>
-                    </AlertDialogFooter>
-                  </AlertDialogContent>
-                </AlertDialog>
-              </DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
-        ) : (
-          <>
-            <button
-              onClick={() => navigate("/login")}
-              className="text-black cursor-pointer items-center gap-1 flex font-semibold border py-2 text-sm transition-all rounded-lg border-black px-5"
-            >
-              <MasukIcon className="w-4 h-4" />
-              Masuk
-            </button>
-            <button
-              onClick={() => navigate("/register")}
-              className="font-semibold py-2 cursor-pointer items-center gap-1 flex text-sm rounded-lg text-white bg-black px-5 transition-all"
-            >
-              <DaftarIcon className="w-4 h-4" />
-              Daftar
-            </button>
-          </>
-        )}
-        <HelpIcon className="w-6 h-6 text-black cursor-pointer" />
       </div>
-    </nav>
+    </div>
   );
 }
-
 export default Navbar;

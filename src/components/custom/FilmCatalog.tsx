@@ -127,7 +127,7 @@ const FilmCatalog = ({ slideDuration = 5000, transitionDuration = 500 }) => {
               className="w-full h-full object-cover"
             />
             {/* Dark gradient overlay from bottom */}
-            <div className="absolute inset-0 bg-gradient-to-t from-white to-transparent opacity-0 group-hover:opacity-100 transition duration-300" />
+            <div className="absolute inset-0 bg-gradient-to-t from-white dark:from-black to-transparent opacity-0 group-hover:opacity-100 transition duration-300" />
             {/* Title */}
             <div className="absolute bottom-16 left-0 w-full text-center text-bold text-xl text-black font-semibold opacity-0 group-hover:opacity-100 transition-opacity duration-300">
               {film.title}
