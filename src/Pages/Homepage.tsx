@@ -19,7 +19,7 @@ function Homepage() {
   }, [resetBooking]); // Hanya dipanggil sekali saat komponen pertama kali render
 
   return (
-    <div className="flex flex-col gap-10 container mx-auto w-full dark:bg-gradient-to-br dark:from-black dark:to-[#003b43]">
+    <div className="flex flex-col gap-10 overflow-x-hidden container mx-auto w-full dark:bg-gradient-to-br dark:from-black dark:to-[#003b43]">
       <Navbar />
       <QuickBar />
       <AdList />

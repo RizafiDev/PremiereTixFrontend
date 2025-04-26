@@ -9,6 +9,15 @@
   font-family: "Mona Sans", sans-serif;
 }
 
+/* global.css atau tailwind.css */
+.scrollbar-hide::-webkit-scrollbar {
+  display: none;
+}
+.scrollbar-hide {
+  -ms-overflow-style: none; /* IE and Edge */
+  scrollbar-width: none; /* Firefox */
+}
+
 body {
   background: linear-gradient(110deg, white 30%, #d1f4fa 70%);
 }

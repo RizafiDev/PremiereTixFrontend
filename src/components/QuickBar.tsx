@@ -13,11 +13,13 @@ function QuickBar() {
   // Cek status login saat komponen di-render
 
   return (
-    <div className="container mx-auto w-full flex items-center bg-transparent px-48 text-textprimary dark:text-white flex-col mt-24">
-      <div className="action w-full flex items-center flex-col gap-4 py-10">
-        <h1 className="font-bold text-4xl">Hai, mau nonton apa nih? </h1>
+    <div className="container mx-auto w-full flex items-center bg-transparent md:px-48 px-4 text-textprimary dark:text-white flex-col mt-24">
+      <div className="action w-full flex items-center flex-col gap-4 md:py-10">
+        <h1 className="font-bold text-2xl md:text-4xl">
+          Hai, mau nonton apa nih?
+        </h1>
         <SearchTab />
-        <div className="category flex items-center gap-12 w-full justify-center mt-2">
+        <div className="category flex items-center gap-5 md:gap-12 w-full justify-center mt-2">
           <div className="film flex flex-col items-center gap-2">
             <button className="truncate bg-blue-50 p-4 rounded-full cursor-pointer">
               <Film className="size-6 text-blue-600 truncate m-0  p-0" />

@@ -97,14 +97,14 @@ function Navbar() {
 
   return (
     <div
-      className={`container mx-auto w-full flex fixed z-[999] items-center px-8 text-textprimary dark:text-white flex-col transition-colors duration-400 ${
+      className={`container mx-auto w-full flex fixed z-[999] items-center px-4 md:px-8 text-textprimary dark:text-white flex-col transition-colors duration-400 ${
         isScrolled
           ? "bg-white/80 backdrop-blur-xs dark:bg-black/80"
           : "bg-transparent"
       }`}
     >
-      <div className="navbar flex items-center justify-between w-full py-3">
-        <div className="left flex items-center gap-8">
+      <div className="navbar flex items-center md:justify-between w-full py-3">
+        <div className="left flex items-center gap-8 md:w-fit w-full justify-between">
           <img src={Logo} alt="" className="w-26 dark:hidden flex" />
           <img src={LogoColor} alt="" className="w-26 dark:flex hidden" />
           <button className="flex h-fit items-center gap-3 bg-zinc-100 dark:bg-zinc-800 rounded-full py-1 px-4">
@@ -112,7 +112,7 @@ function Navbar() {
             <span className="font-bold text-sm">JAKARTA</span>
           </button>
         </div>
-        <div className="right flex items-center gap-4">
+        <div className="right  items-center gap-4 hidden md:flex">
           <button
             onClick={toggleTheme}
             className="flex items-center justify-center w-9 h-9 rounded-full transition-all duration-300 bg-muted text-muted-foreground hover:scale-110 dark:bg-muted dark:text-muted-foreground shadow"
@@ -201,7 +201,7 @@ function Navbar() {
         </div>
       </div>
       <div
-        className={`sub-navbar w-full  items-center justify-between py-6 transition-opacity duration-100 ${
+        className={`sub-navbar md:flex hidden w-full  items-center justify-between py-6 transition-opacity duration-100 ${
           isScrolled ? "flex opacity-100" : "pointer-events-none opacity-0"
         }`}
       >

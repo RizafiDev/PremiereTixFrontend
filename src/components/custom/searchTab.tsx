@@ -18,7 +18,7 @@ function SearchTab() {
     <div className="relative w-full max-w-lg ">
       <Command className="border border-b-0 shadow-lg shadow-gray-200 dark:shadow-none dark:bg-zinc-800 rounded-full ">
         <CommandInput
-          className="font-medium text-sm"
+          className="font-medium text-sm "
           ref={inputRef}
           placeholder="Mau cari film atau makanan?"
           onFocus={() => setIsOpen(true)}

@@ -10,7 +10,6 @@ const FilmCatalog = ({ slideDuration = 5000, transitionDuration = 500 }) => {
   const [isAnimating, setIsAnimating] = useState(false);
   const navigate = useNavigate();
 
-  // Number of films to display per slide
   const filmsPerSlide = 5;
 
   useEffect(() => {
@@ -28,10 +27,9 @@ const FilmCatalog = ({ slideDuration = 5000, transitionDuration = 500 }) => {
   }, []);
 
   const nextSlide = useCallback(() => {
-    if (films.length <= filmsPerSlide) return; // Don't animate if we have 5 or fewer films
+    if (films.length <= filmsPerSlide) return;
 
     setIsAnimating(true);
-
     setTimeout(() => {
       setCurrentIndex(
         (prevIndex) => (prevIndex + 1) % (films.length - (filmsPerSlide - 1))
@@ -41,7 +39,7 @@ const FilmCatalog = ({ slideDuration = 5000, transitionDuration = 500 }) => {
   }, [films.length, transitionDuration]);
 
   useEffect(() => {
-    if (films.length <= filmsPerSlide) return; // Don't set up carousel if we have 5 or fewer films
+    if (films.length <= filmsPerSlide) return;
 
     const interval = setInterval(nextSlide, slideDuration);
     return () => clearInterval(interval);
@@ -56,7 +54,6 @@ const FilmCatalog = ({ slideDuration = 5000, transitionDuration = 500 }) => {
     if (isAnimating || films.length <= filmsPerSlide) return;
 
     setIsAnimating(true);
-
     setTimeout(() => {
       if (direction === "prev") {
         setCurrentIndex((prevIndex) =>
@@ -75,7 +72,6 @@ const FilmCatalog = ({ slideDuration = 5000, transitionDuration = 500 }) => {
   if (error) return <p>{error}</p>;
   if (films.length === 0) return <p>Tidak ada film tersedia</p>;
 
-  // Display logic for films
   const displayFilms =
     films.length <= filmsPerSlide
       ? films
@@ -88,19 +84,19 @@ const FilmCatalog = ({ slideDuration = 5000, transitionDuration = 500 }) => {
         ];
 
   return (
-    <div className="w-full  relative">
+    <div className="w-full relative">
       {films.length > filmsPerSlide && (
         <>
           <button
             onClick={() => manualNavigate("prev")}
-            className="absolute left-0 top-1/2 -translate-y-1/2 z-10 bg-black/50 text-white p-2 rounded-r-lg hover:bg-black/70"
+            className="hidden md:block absolute left-0 top-1/2 -translate-y-1/2 z-10 bg-black/50 text-white p-2 rounded-r-lg hover:bg-black/70"
             disabled={isAnimating}
           >
             &#10094;
           </button>
           <button
             onClick={() => manualNavigate("next")}
-            className="absolute right-0 top-1/2 -translate-y-1/2 z-10 bg-black/50 text-white p-2 rounded-l-lg hover:bg-black/70"
+            className="hidden md:block absolute right-0 top-1/2 -translate-y-1/2 z-10 bg-black/50 text-white p-2 rounded-l-lg hover:bg-black/70"
             disabled={isAnimating}
           >
             &#10095;
@@ -109,7 +105,10 @@ const FilmCatalog = ({ slideDuration = 5000, transitionDuration = 500 }) => {
       )}
 
       <div
-        className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-5 gap-4 transition-all duration-500"
+        className="
+          flex overflow-x-auto scrollbar-hide snap-x snap-mandatory gap-4 transition-all duration-500
+          md:grid md:grid-cols-5 md:overflow-x-hidden md:snap-none
+        "
         style={{
           transitionDuration: `${transitionDuration}ms`,
           opacity: isAnimating ? 0.7 : 1,
@@ -119,14 +118,17 @@ const FilmCatalog = ({ slideDuration = 5000, transitionDuration = 500 }) => {
         {displayFilms.map((film) => (
           <div
             key={film.id}
-            className="aspect-[2/3] rounded-xl overflow-hidden group relative shadow-md hover:shadow-xl transition-shadow duration-300"
+            className="
+              aspect-[2/3] rounded-xl overflow-hidden group relative shadow-md hover:shadow-xl transition-shadow duration-300
+              snap-center flex-shrink-0 w-4/5 sm:w-3/5 md:w-auto
+            "
           >
             <img
               src={film.photo}
               alt={film.title}
               className="w-full h-full object-cover"
             />
-            {/* Dark gradient overlay from bottom */}
+            {/* Dark overlay */}
             <div className="absolute inset-0 bg-gradient-to-t from-white dark:from-black to-transparent opacity-0 group-hover:opacity-100 transition duration-300" />
             {/* Title */}
             <div className="absolute bottom-16 left-0 w-full text-center text-bold text-xl text-black font-semibold opacity-0 group-hover:opacity-100 transition-opacity duration-300">

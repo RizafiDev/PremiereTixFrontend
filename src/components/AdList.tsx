@@ -30,7 +30,7 @@ const images = [
 
 function AdList() {
   return (
-    <header className="container mx-auto w-full px-48 pt-4">
+    <header className="container mx-auto w-full px-4 md:px-48 pt-4">
       <Carousel images={images} transitionDuration={2000} />
     </header>
   );

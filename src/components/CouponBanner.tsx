@@ -13,27 +13,42 @@ import promo8 from "../../public/coupon/promo8.jpg";
 import promo9 from "../../public/coupon/promo9.jpg";
 
 const promoImages = [
-  { src: promo1, title: "Promo 1", rating: 0 },
-  { src: promo2, title: "Promo 2", rating: 0 },
-  { src: promo3, title: "Promo 3", rating: 0 },
-  { src: promo4, title: "Promo 4", rating: 0 },
-  { src: promo5, title: "Promo 5", rating: 0 },
-  { src: promo6, title: "Promo 6", rating: 0 },
-  { src: promo7, title: "Promo 7", rating: 0 },
-  { src: promo8, title: "Promo 8", rating: 0 },
-  { src: promo9, title: "Promo 9", rating: 0 },
+  { src: promo1, title: "Promo 1" },
+  { src: promo2, title: "Promo 2" },
+  { src: promo3, title: "Promo 3" },
+  { src: promo4, title: "Promo 4" },
+  { src: promo5, title: "Promo 5" },
+  { src: promo6, title: "Promo 6" },
+  { src: promo7, title: "Promo 7" },
+  { src: promo8, title: "Promo 8" },
+  { src: promo9, title: "Promo 9" },
 ];
 
-const ITEMS_PER_VIEW = 3;
 const SCROLL_INTERVAL = 4000; // ms
 const TRANSITION_DURATION = 500; // ms
 
 function CouponBanner(): React.ReactElement {
   const [activeIndex, setActiveIndex] = useState(0);
+  const [itemsPerView, setItemsPerView] = useState(1);
   const intervalRef = useRef<NodeJS.Timeout | null>(null);
-  const maxIndex = promoImages.length - ITEMS_PER_VIEW;
 
-  // Auto scroll
+  const updateItemsPerView = () => {
+    if (window.innerWidth >= 768) {
+      setItemsPerView(3);
+    } else {
+      setItemsPerView(1);
+    }
+  };
+
+  useEffect(() => {
+    updateItemsPerView();
+    window.addEventListener("resize", updateItemsPerView);
+
+    return () => window.removeEventListener("resize", updateItemsPerView);
+  }, []);
+
+  const maxIndex = Math.max(0, promoImages.length - itemsPerView);
+
   useEffect(() => {
     intervalRef.current = setInterval(() => {
       setActiveIndex((prevIndex) =>
@@ -49,14 +64,10 @@ function CouponBanner(): React.ReactElement {
   }, [maxIndex]);
 
   const goToPrev = (): void => {
-    // Reset the auto-scroll interval
-    if (intervalRef.current) {
-      clearInterval(intervalRef.current);
-    }
+    if (intervalRef.current) clearInterval(intervalRef.current);
 
     setActiveIndex((prevIndex) => (prevIndex <= 0 ? maxIndex : prevIndex - 1));
 
-    // Restart interval
     intervalRef.current = setInterval(() => {
       setActiveIndex((prevIndex) =>
         prevIndex >= maxIndex ? 0 : prevIndex + 1
@@ -65,14 +76,10 @@ function CouponBanner(): React.ReactElement {
   };
 
   const goToNext = (): void => {
-    // Reset the auto-scroll interval
-    if (intervalRef.current) {
-      clearInterval(intervalRef.current);
-    }
+    if (intervalRef.current) clearInterval(intervalRef.current);
 
     setActiveIndex((prevIndex) => (prevIndex >= maxIndex ? 0 : prevIndex + 1));
 
-    // Restart interval
     intervalRef.current = setInterval(() => {
       setActiveIndex((prevIndex) =>
         prevIndex >= maxIndex ? 0 : prevIndex + 1
@@ -81,10 +88,10 @@ function CouponBanner(): React.ReactElement {
   };
 
   return (
-    <div className="container text-textprimary dark:text-white mx-auto px-4 md:px-8 lg:px-16 xl:px-48 w-full relative">
+    <div className="container text-textprimary dark:text-white mx-auto px-4 md:px-48 w-full relative">
       {/* Header */}
       <div className="flex justify-between items-center mb-4">
-        <h1 className="text-2xl font-bold">Mau pake promo?</h1>
+        <h1 className="text-xl md:text-2xl font-bold">Mau pake promo?</h1>
         <button className="text-sm font-medium text-gray-600 flex items-center gap-1">
           Semua <SemuaIcon className="w-5 h-5" />
         </button>
@@ -92,7 +99,7 @@ function CouponBanner(): React.ReactElement {
 
       {/* Carousel */}
       <div className="relative overflow-hidden">
-        {/* Left navigation arrow */}
+        {/* Left navigation */}
         <button
           onClick={goToPrev}
           className="absolute left-2 top-1/2 -translate-y-1/2 z-10 bg-black/40 hover:bg-black/70 text-white rounded-full p-2"
@@ -100,7 +107,7 @@ function CouponBanner(): React.ReactElement {
           <ChevronLeft size={20} />
         </button>
 
-        {/* Right navigation arrow */}
+        {/* Right navigation */}
         <button
           onClick={goToNext}
           className="absolute right-2 top-1/2 -translate-y-1/2 z-10 bg-black/40 hover:bg-black/70 text-white rounded-full p-2"
@@ -108,7 +115,7 @@ function CouponBanner(): React.ReactElement {
           <ChevronRight size={20} />
         </button>
 
-        {/* Carousel Container */}
+        {/* Carousel container */}
         <div
           className="flex"
           style={{
@@ -116,7 +123,7 @@ function CouponBanner(): React.ReactElement {
               (100 / promoImages.length) * activeIndex
             }%)`,
             transition: `transform ${TRANSITION_DURATION}ms ease-in-out`,
-            width: `${(100 / ITEMS_PER_VIEW) * promoImages.length}%`,
+            width: `${(100 / itemsPerView) * promoImages.length}%`,
           }}
         >
           {promoImages.map((image, index) => (
@@ -133,20 +140,6 @@ function CouponBanner(): React.ReactElement {
             </div>
           ))}
         </div>
-
-        {/* Pagination indicators */}
-        {/* <div className="flex justify-center mt-4 gap-2">
-          {Array.from({ length: maxIndex + 1 }).map((_, idx) => (
-            <button
-              key={idx}
-              onClick={() => setActiveIndex(idx)}
-              className={`w-2 h-2 rounded-full ${
-                activeIndex === idx ? "bg-blue-600" : "bg-gray-300"
-              }`}
-              aria-label={`Go to slide ${idx + 1}`}
-            />
-          ))}
-        </div> */}
       </div>
     </div>
   );

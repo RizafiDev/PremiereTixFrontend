@@ -1,5 +1,4 @@
 import { useRef, useEffect, useState } from "react";
-// import { ChevronLeft, ChevronRight } from "lucide-react";
 
 interface CarouselProps {
   images: { src: string; title: string; rating: number }[];
@@ -11,11 +10,27 @@ const Carousel: React.FC<CarouselProps> = ({
   transitionDuration = 500,
 }) => {
   const [activeIndex, setActiveIndex] = useState(0);
+  const [visibleSlides, setVisibleSlides] = useState(1); // default 1 untuk mobile
   const intervalRef = useRef<NodeJS.Timeout | null>(null);
 
-  const visibleSlides = 3;
   const maxIndex = images.length - visibleSlides;
 
+  // Handle responsive visibleSlides
+  useEffect(() => {
+    const handleResize = () => {
+      if (window.innerWidth >= 768) {
+        setVisibleSlides(3); // md ke atas: 4 slides
+      } else {
+        setVisibleSlides(1); // mobile: 1 slide
+      }
+    };
+
+    handleResize(); // Set awal
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
+  }, []);
+
+  // Auto-slide
   useEffect(() => {
     intervalRef.current = setInterval(() => {
       setActiveIndex((prevIndex) =>
@@ -28,33 +43,11 @@ const Carousel: React.FC<CarouselProps> = ({
     };
   }, [maxIndex]);
 
-  // const goToPrev = () => {
-  //   setActiveIndex((prevIndex) => (prevIndex <= 0 ? maxIndex : prevIndex - 1));
-  // };
-
-  // const goToNext = () => {
-  //   setActiveIndex((prevIndex) => (prevIndex >= maxIndex ? 0 : prevIndex + 1));
-  // };
-
   return (
     <div
       className="relative w-full overflow-hidden"
       style={{ height: "140px" }}
     >
-      {/* Arrow Buttons */}
-      {/* <button
-        onClick={goToPrev}
-        className="absolute left-2 top-1/2 -translate-y-1/2 z-10 bg-black/40 hover:bg-black/70 text-white rounded-full p-2"
-      >
-        <ChevronLeft size={20} />
-      </button>
-      <button
-        onClick={goToNext}
-        className="absolute right-2 top-1/2 -translate-y-1/2 z-10 bg-black/40 hover:bg-black/70 text-white rounded-full p-2"
-      >
-        <ChevronRight size={20} />
-      </button> */}
-
       {/* Carousel Container */}
       <div
         className="flex h-full"
@@ -80,6 +73,7 @@ const Carousel: React.FC<CarouselProps> = ({
       </div>
 
       {/* Dots Indicator */}
+      {/* Uncomment kalau mau pakai dots */}
       {/* <div className="absolute bottom-2 left-1/2 transform -translate-x-1/2 flex space-x-2">
         {Array.from({ length: maxIndex + 1 }).map((_, index) => (
           <div
