@@ -10,6 +10,7 @@ import { AuthInitializer } from "@/components/AuthInitializer";
 import { ProtectedRoute } from "@/components/ProtectedRoute";
 import PaymentSuccess from "./Pages/transaction/films/PaymentSucces";
 import TicketScanner from "./Pages/scanner/TicketScanner";
+import SelectSchedule from "./Pages/transaction/films/SelectSchedule";
 
 function App() {
   return (
@@ -30,6 +31,9 @@ function App() {
 
           {/* feature */}
           <Route path="/scanner" element={<TicketScanner />} />
+          <Route path="/select-schedule" element={<SelectSchedule />} />
+
+          {/* routes that need authentication check */}
 
           {/* routes that don't need authentication check */}
 

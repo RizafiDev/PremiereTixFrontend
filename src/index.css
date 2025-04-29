@@ -9,6 +9,12 @@
   font-family: "Mona Sans", sans-serif;
 }
 
+.mask-gradient {
+  mask-image: linear-gradient(to bottom, rgba(0,0,0,1) 20%, rgba(0,0,0,0) 100%);
+  -webkit-mask-image: linear-gradient(to bottom, rgba(0,0,0,1) 20%, rgba(0,0,0,0) 100%);
+}
+
+
 /* global.css atau tailwind.css */
 .scrollbar-hide::-webkit-scrollbar {
   display: none;
