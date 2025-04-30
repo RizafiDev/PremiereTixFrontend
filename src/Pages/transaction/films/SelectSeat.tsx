@@ -139,7 +139,7 @@ function SelectSeat() {
         <div className="flex items-center gap-4">
           <BackIcon
             className="w-8 h-8 cursor-pointer"
-            onClick={() => navigate("/buy")}
+            onClick={() => navigate("/select-schedule")}
           />
           <p className="text-3xl font-bold">Select Seat</p>
         </div>

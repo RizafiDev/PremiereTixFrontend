@@ -11,6 +11,7 @@ import { ProtectedRoute } from "@/components/ProtectedRoute";
 import PaymentSuccess from "./Pages/transaction/films/PaymentSucces";
 import TicketScanner from "./Pages/scanner/TicketScanner";
 import SelectSchedule from "./Pages/transaction/films/SelectSchedule";
+import MyTicket from "./Pages/transaction/films/MyTicket";
 
 function App() {
   return (
@@ -31,7 +32,7 @@ function App() {
 
           {/* feature */}
           <Route path="/scanner" element={<TicketScanner />} />
-          <Route path="/select-schedule" element={<SelectSchedule />} />
+          <Route path="/tickets" element={<MyTicket />} />
 
           {/* routes that need authentication check */}
 
@@ -44,6 +45,14 @@ function App() {
             element={
               <ProtectedRoute>
                 <SelectSeat />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/select-schedule"
+            element={
+              <ProtectedRoute>
+                <SelectSchedule />
               </ProtectedRoute>
             }
           />

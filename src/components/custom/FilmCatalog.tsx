@@ -47,7 +47,7 @@ const FilmCatalog = ({ slideDuration = 5000, transitionDuration = 500 }) => {
 
   const handleBuyTicket = (film: Film) => {
     const token = localStorage.getItem("token");
-    navigate(token ? "/buy" : "/login", { state: { film } });
+    navigate(token ? "/select-schedule" : "/login", { state: { film } });
   };
 
   const manualNavigate = (direction: "prev" | "next") => {

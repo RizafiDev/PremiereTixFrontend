@@ -105,8 +105,18 @@ function Navbar() {
     >
       <div className="navbar flex items-center md:justify-between w-full py-3">
         <div className="left flex items-center gap-8 md:w-fit w-full justify-between">
-          <img src={Logo} alt="" className="w-26 dark:hidden flex" />
-          <img src={LogoColor} alt="" className="w-26 dark:flex hidden" />
+          <img
+            src={Logo}
+            alt=""
+            className="w-26 dark:hidden flex cursor-pointer"
+            onClick={() => navigate("/")}
+          />
+          <img
+            src={LogoColor}
+            alt=""
+            className="w-26 dark:flex hidden cursor-pointer"
+            onClick={() => navigate("/")}
+          />
           <button className="flex h-fit items-center gap-3 bg-zinc-100 dark:bg-zinc-800 rounded-full py-1 px-4">
             <Map className="size-4" />{" "}
             <span className="font-bold text-sm">JAKARTA</span>
@@ -143,7 +153,10 @@ function Navbar() {
                 <DropdownMenuItem className="text-xs font-medium">
                   Profile
                 </DropdownMenuItem>
-                <DropdownMenuItem className="text-xs font-medium">
+                <DropdownMenuItem
+                  onClick={() => navigate("/tickets")}
+                  className="text-xs font-medium"
+                >
                   My Ticket
                 </DropdownMenuItem>
                 <DropdownMenuSeparator />
