@@ -214,7 +214,7 @@ function Navbar() {
         </div>
       </div>
       <div
-        className={`sub-navbar md:flex hidden w-full  items-center justify-between py-6 transition-opacity duration-100 ${
+        className={`sub-navbar md:flex hidden w-full  items-center justify-between py-6 transition-opacity duration-100 relative ${
           isScrolled ? "flex opacity-100" : "pointer-events-none opacity-0"
         }`}
       >
