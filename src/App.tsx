@@ -11,7 +11,7 @@ import { ProtectedRoute } from "@/components/ProtectedRoute";
 import PaymentSuccess from "./Pages/transaction/films/PaymentSucces";
 import TicketScanner from "./Pages/scanner/TicketScanner";
 import SelectSchedule from "./Pages/transaction/films/SelectSchedule";
-import MyTicket from "./Pages/transaction/films/MyTicket";
+import MyTicket from "./Pages/transaction/ticket/MyTicket";
 
 function App() {
   return (
