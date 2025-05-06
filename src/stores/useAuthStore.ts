@@ -1,11 +1,18 @@
 import { create } from "zustand";
 
+
+interface User {
+  id: number;
+  name: string;
+  email: string;
+  // add other user properties as needed
+}
 interface AuthState {
-  user: any | null;
+  user: User | null;
   token: string | null;
   isAuthenticated: boolean;
   initialize: () => Promise<void>;
-  login: (user: any, token: string) => void;
+  login: (user: User, token: string) => void;
   logout: () => void;
   checkAuth: () => Promise<boolean>;
 }
