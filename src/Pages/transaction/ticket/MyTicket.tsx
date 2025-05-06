@@ -383,7 +383,7 @@ function MyTicket() {
                                 <p>{ticket.seats.join(", ")}</p>
                               </div>
                             </div>
-                          </div>  
+                          </div>
                         </div>
                         <HolesEffect />
                       </div>
