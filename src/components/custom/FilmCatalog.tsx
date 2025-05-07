@@ -119,30 +119,16 @@ const FilmCatalog = ({ slideDuration = 5000, transitionDuration = 500 }) => {
           <div
             key={film.id}
             className="
-              aspect-[2/3] rounded-xl overflow-hidden group relative shadow-md hover:shadow-xl transition-shadow duration-300
+              aspect-[2/3]   rounded-xl overflow-hidden group relative shadow-md hover:shadow-xl transition-shadow duration-300
               snap-center flex-shrink-0 w-4/5 sm:w-3/5 md:w-auto
             "
           >
             <img
               src={film.photo}
               alt={film.title}
-              className="w-full h-full object-cover"
+              className="w-full h-full object-cover cursor-pointer "
+              onClick={() => handleBuyTicket(film)}
             />
-            {/* Dark overlay */}
-            <div className="absolute inset-0 bg-gradient-to-t from-white dark:from-black to-transparent opacity-0 group-hover:opacity-100 transition duration-300" />
-            {/* Title */}
-            <div className="absolute bottom-16 left-0 w-full text-center text-bold text-xl text-black font-semibold opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-              {film.title}
-            </div>
-            {/* Buy button */}
-            <div className="absolute bottom-0 left-0 w-full opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-              <button
-                onClick={() => handleBuyTicket(film)}
-                className="w-full bg-textsecondary text-white py-3 text-sm font-bold transition cursor-pointer"
-              >
-                Beli Tiket
-              </button>
-            </div>
           </div>
         ))}
       </div>

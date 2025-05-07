@@ -24,7 +24,7 @@ function SeatBox({
   return (
     <div
       className={clsx(
-        "h-12 w-12 rounded-lg flex items-center justify-center font-semibold transition-colors",
+        "md:h-12 md:w-12 w-5 h-5 rounded-xs md:rounded-lg flex items-center justify-center font-medium md:font-semibold transition-colors md:text-base text-[8px] ",
         isBooked
           ? "bg-gray-300 text-white cursor-not-allowed"
           : isSelected
@@ -133,7 +133,7 @@ function SelectSeat() {
   }
 
   return (
-    <div className="container relative mx-auto w-full overflow-y-auto h-screen px-18 py-6 gap-12 flex flex-col">
+    <div className="container relative mx-auto w-full overflow-y-auto h-screen px-4 md:px-18 py-6 gap-12 flex flex-col">
       {/* Header */}
       <div className="flex items-center justify-between border-b pb-4">
         <div className="flex items-center gap-4">
@@ -141,7 +141,7 @@ function SelectSeat() {
             className="w-8 h-8 cursor-pointer"
             onClick={() => navigate("/select-schedule")}
           />
-          <p className="text-3xl font-bold">Select Seat</p>
+          <p className="md:text-3xl text-xl font-bold">Select Seat</p>
         </div>
         <div className="flex items-center gap-3">
           <p className="text-lg font-semibold">
@@ -173,9 +173,9 @@ function SelectSeat() {
       </div>
 
       {/* Seat Grid */}
-      <div className="flex flex-col gap-3 items-center">
+      <div className="flex flex-col md:gap-3 gap-1 items-center">
         {rows.map((row) => (
-          <div key={row} className="flex gap-4 items-center justify-between">
+          <div key={row} className="flex md:gap-4 gap-1 items-center justify-between">
             {/* Left Panel */}
             {colsLeft.map((col) => {
               const seat = `${row}${col}`;
@@ -191,7 +191,7 @@ function SelectSeat() {
             })}
 
             {/* Spacer between left and middle */}
-            <div className="w-20" />
+            <div className="md:w-20 w-8" />
 
             {/* Middle Panel */}
             {colsMiddle.map((col) => {
@@ -208,7 +208,7 @@ function SelectSeat() {
             })}
 
             {/* Spacer between middle and right */}
-            <div className="w-20 " />
+            <div className="md:w-20 w-8" />
 
             {/* Right Panel */}
             {colsRight.map((col) => {

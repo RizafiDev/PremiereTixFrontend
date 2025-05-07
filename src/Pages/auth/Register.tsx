@@ -1,12 +1,12 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
+import { useAuthStore } from "@/stores/useAuthStore";
 import {
   EyeIcon as Eye,
   EyeSlashIcon as EyeSlash,
   ChevronLeftIcon as ArrowLeft,
 } from "@heroicons/react/24/solid";
-import { useAuthStore } from "@/stores/useAuthStore";
 
 function Register() {
   const [showPassword, setShowPassword] = useState(false);
@@ -19,12 +19,12 @@ function Register() {
     confirmPassword: "",
   });
 
+  const { login } = useAuthStore();
+  const navigate = useNavigate();
+
   const togglePasswordVisibility = () => {
     setShowPassword(!showPassword);
   };
-
-  const { login } = useAuthStore();
-  const navigate = useNavigate();
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
@@ -42,13 +42,18 @@ function Register() {
       return false;
     }
 
-    if (password !== confirmPassword) {
-      setErrorMessage("Password dan konfirmasi password tidak cocok.");
+    if (!/\S+@\S+\.\S+/.test(email)) {
+      setErrorMessage("Email tidak valid.");
       return false;
     }
 
     if (password.length < 6) {
-      setErrorMessage("Password harus memiliki minimal 6 karakter.");
+      setErrorMessage("Password harus minimal 6 karakter.");
+      return false;
+    }
+
+    if (password !== confirmPassword) {
+      setErrorMessage("Password dan konfirmasi password tidak cocok.");
       return false;
     }
 
@@ -83,23 +88,31 @@ function Register() {
       );
 
       if (response.status === 200 || response.status === 201) {
-        const { token, user } = response.data;
+        // Automatically log in the user after registration
+        const loginResponse = await axios.post(
+          "http://127.0.0.1:8000/api/dashboard/app-users/login",
+          {
+            email: formData.email,
+            password: formData.password,
+          },
+          {
+            headers: {
+              "Content-Type": "application/json",
+              Accept: "application/json",
+            },
+          }
+        );
 
-        // Optional: cek log biar aman
-        console.log("Login success:", { user, token });
-
-        // Simpan ke auth store
-        login(user, token);
-
-        // Delay sedikit untuk memastikan store update sebelum redirect
-        setTimeout(() => {
+        if (loginResponse.status === 200 || loginResponse.status === 201) {
+          const { token, user } = loginResponse.data;
+          login(user, token);
           navigate("/");
-        }, 100);
+        }
       }
     } catch (error: any) {
       setErrorMessage(
         error.response?.data?.message ||
-          "Terjadi kesalahan saat mendaftar. Silakan coba lagi."
+          "Terjadi kesalahan saat registrasi. Silakan coba lagi."
       );
     } finally {
       setIsLoading(false);
@@ -119,6 +132,7 @@ function Register() {
             <div className="text-red-500 text-xs mt-2">{errorMessage}</div>
           )}
         </div>
+        
         <div className="name flex flex-col space-y-2">
           <label htmlFor="name" className="text-xs font-medium">
             Nama Pengguna
@@ -132,6 +146,7 @@ function Register() {
             className="outline-none pt-1.5 placeholder:font-normal font-medium text-sm pb-2 px-3 rounded-sm border border-gray-300 focus:outline-2 focus:border-cusprimary transition-all"
           />
         </div>
+        
         <div className="email flex flex-col space-y-2">
           <label htmlFor="email" className="text-xs font-medium">
             Email
@@ -145,6 +160,7 @@ function Register() {
             className="outline-none pt-1.5 placeholder:font-normal font-medium text-sm pb-2 px-3 rounded-sm border border-gray-300 focus:outline-2 focus:border-cusprimary transition-all"
           />
         </div>
+        
         <div className="password flex flex-col space-y-2 relative">
           <label htmlFor="password" className="text-xs font-medium">
             Password
@@ -169,6 +185,7 @@ function Register() {
             />
           )}
         </div>
+        
         <div className="password flex flex-col space-y-2 relative">
           <label htmlFor="confirmPassword" className="text-xs font-medium">
             Konfirmasi Password
@@ -193,6 +210,7 @@ function Register() {
             />
           )}
         </div>
+        
         <button
           type="submit"
           disabled={isLoading}
@@ -204,6 +222,7 @@ function Register() {
             "Daftar"
           )}
         </button>
+        
         <p className="text-xs text-gray-600 font-medium text-center">
           Sudah memiliki akun?{" "}
           <span
@@ -214,6 +233,7 @@ function Register() {
           </span>
         </p>
       </form>
+      
       <button
         onClick={() => navigate("/")}
         className="max-w-[360px] w-full py-3 cursor-pointer hover:bg-neutral-50 transition-all bg-white rounded-sm flex items-center justify-center gap-1 shadow-xs text-xs font-medium mt-5 border border-gray-300"

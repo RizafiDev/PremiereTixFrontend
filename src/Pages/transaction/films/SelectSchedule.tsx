@@ -112,7 +112,7 @@ function SelectSchedule() {
   }, [currentFilm, film, booking.film, setBooking]);
 
   // Get upcoming 7 days
-  const upcomingDays = [...Array(7)].map((_, i) => dayjs().add(i, "day"));
+  const upcomingDays = [...Array(5)].map((_, i) => dayjs().add(i, "day"));
 
   // Filter schedules based on selected date
   const filteredSchedules = schedules.filter(
@@ -208,7 +208,7 @@ function SelectSchedule() {
   }
 
   return (
-    <div className="container relative text-textprimary mx-auto w-full bg-transparent flex flex-col dark:bg-gradient-to-br dark:from-black dark:to-[#003b43]">
+    <div className="container relative text-textprimary dark:text-white mx-auto w-full bg-transparent flex flex-col dark:bg-gradient-to-br dark:from-black dark:to-[#003b43]">
       <NavbarRaw />
       <div className="poster w-full h-68 overflow-hidden absolute top-0 left-0">
         <img
@@ -217,14 +217,14 @@ function SelectSchedule() {
           className="object-cover opacity-15 h-full w-full mask-gradient"
         />
       </div>
-      <div className="content w-full mx-auto flex flex-col items-start px-10 md:px-24 lg:px-[445px] mt-28 gap-6">
-        <div className="breadcrumbs font-medium text-sm">
+      <div className="content w-full mx-auto flex flex-col items-start px-4 md:px-[445px] mt-28 gap-4 md:gap-6">
+        <div className="breadcrumbs font-medium text-xs md:text-sm">
           <p>
             Beranda / Film /{" "}
             <span className="font-semibold">{currentFilm.title}</span>
           </p>
         </div>
-        <h1 className="font-bold text-4xl">Detail Film</h1>
+        <h1 className="font-bold text-2xl md:text-4xl">Detail Film</h1>
         <div className="film-information flex items-center gap-6">
           <img
             src={currentFilm.photo}
@@ -232,13 +232,13 @@ function SelectSchedule() {
             alt={currentFilm.title}
           />
           <div className="desc flex flex-col items-start gap-2">
-            <p className="font-semibold text-4xl">{currentFilm.title}</p>
-            <p className="font-medium">{currentFilm.description}</p>
+            <p className="font-semibold text-2xl md:text-4xl">{currentFilm.title}</p>
+            <p className="font-medium max-w-prose md:text-base text-sm">{currentFilm.description}</p>
             <ul className="flex items-center gap-2 flex-wrap">
               {currentFilm.genres.map((genre) => (
                 <li
                   key={genre.id}
-                  className="truncate bg-zinc-200 w-fit py-1 px-3 text-xs font-medium rounded-sm"
+                  className="truncate dark:bg-cusprimary/70 bg-zinc-200 w-fit py-1 px-3 text-[10px] md:text-xs font-medium rounded-sm"
                 >
                   {genre.genre}
                 </li>
@@ -249,26 +249,26 @@ function SelectSchedule() {
         <div className="container mx-auto w-full flex flex-col items-start">
           <div className="action">
             <ul className="flex items-center gap-4">
-              <li className="font-semibold py-4 cursor-pointer border-b-2 border-b-black">
+              <li className="font-semibold text-sm md:text-base  py-4 cursor-pointer border-b-2 border-b-black">
                 Jadwal
               </li>
-              <li className="font-normal py-4 cursor-pointer">Sinopsis</li>
+              <li className="font-normal text-sm md:text-base py-4 cursor-pointer">Sinopsis</li>
             </ul>
           </div>
           <div className="w-full h-[1px] bg-gray-400"></div>
-          <div className="calendar mt-6 flex items-center gap-6 flex-wrap">
+          <div className="calendar mt-6 flex items-center gap-4 md:gap-6 flex-wrap">
             {upcomingDays.map((day) => (
               <div
                 key={day.format("YYYY-MM-DD")}
-                className={`wrapper flex flex-col items-center ${
+                className={`wrapper flex flex-col items-center md:w-16 md:h-18 w-14 h-16 ${
                   selectedDate === day.format("YYYY-MM-DD")
                     ? "bg-textsecondary text-white"
-                    : "bg-transparent text-textprimary/30"
+                    : "bg-transparent dark:bg-cusprimary/40 dark:text-white/70 text-textprimary/30"
                 } px-3 py-2 rounded-md cursor-pointer`}
                 onClick={() => handleDateSelect(day.format("YYYY-MM-DD"))}
               >
-                <p className="text-base font-normal">{day.format("ddd")}</p>
-                <p className="text-xl font-bold">{day.format("D")}</p>
+                <p className="text-sm md:text-base font-normal">{day.format("ddd")}</p>
+                <p className="text-base md:text-xl font-bold">{day.format("D")}</p>
               </div>
             ))}
           </div>
@@ -298,11 +298,11 @@ function SelectSchedule() {
                 return (
                   <div
                     key={cinemaGroup.cinema.id}
-                    className="item-wrapper flex flex-col w-full bg-white/70 p-8 rounded-xl gap-4"
+                    className="item-wrapper flex flex-col w-full dark:bg-cusprimary/40 bg-white/70 p-8 rounded-xl gap-4"
                   >
                     <div className="top flex items-center gap-6">
-                      <CinemaIcon className="size-6 text-textprimary" />
-                      <p className="font-semibold text-xl uppercase">
+                      <CinemaIcon className="size-7 text-textprimary dark:text-white" />
+                      <p className="font-semibold text-lg md:text-xl uppercase">
                         {cinemaGroup.cinema.name}
                       </p>
                     </div>
@@ -323,10 +323,10 @@ function SelectSchedule() {
                         return (
                           <div key={studioKey} className="studio-section mb-4">
                             <div className="information flex items-center w-full justify-between">
-                              <p className="font-semibold">
+                              <p className="font-semibold md:text-base text-sm">
                                 Studio {studioData.studio}
                               </p>
-                              <p className="font-semibold">
+                              <p className="font-semibold md:text-base text-sm">
                                 Rp
                                 {Number(studioData.price).toLocaleString(
                                   "id-ID"
@@ -345,7 +345,7 @@ function SelectSchedule() {
                                 return (
                                   <p
                                     key={timeInfo.id}
-                                    className={`font-semibold p-4 rounded-md text-center ${
+                                    className={`font-semibold md:p-4 p-2 rounded-md text-sm md:text-base text-center ${
                                       isPast || timeInfo.isFull
                                         ? "text-textprimary/20 bg-textprimary/5 cursor-not-allowed"
                                         : isSelected
@@ -389,7 +389,7 @@ function SelectSchedule() {
           <div className="actions w-full mt-8">
             <button
               onClick={handleProceedToSeats}
-              className={`w-full py-3 rounded-lg ${
+              className={`w-full py-2 md:py-3 rounded-lg md:text-base text-sm ${
                 selectedShowtime.id
                   ? "bg-textsecondary text-white cursor-pointer"
                   : "bg-gray-300 text-gray-500 cursor-not-allowed"

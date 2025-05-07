@@ -1,5 +1,4 @@
 import { ArrowRightCircleIcon as SemuaIcon } from "@heroicons/react/24/outline";
-import FilmList from "@/components/custom/FilmList";
 import FilmCatalog from "./custom/FilmCatalog";
 
 function PlayingFilm() {
