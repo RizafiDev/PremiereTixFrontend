@@ -378,7 +378,7 @@ function MyTicket() {
                               </div>
                               <div className="place flex flex-col items-start text-sm gap-2 font-semibold text-black">
                                 <p className="bg-white/50 px-1 rounded-sm">
-                                  {ticket.order_id}
+                                  {ticket.id}
                                 </p>
                                 <p>{ticket.seats.join(", ")}</p>
                               </div>

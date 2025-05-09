@@ -17,6 +17,8 @@ interface TicketData {
 const TicketScanner = () => {
   const [scanResult, setScanResult] = useState<TicketData | null>(null);
   const [isScanning, setIsScanning] = useState(true);
+  const [printStatus, setPrintStatus] = useState<string>("");
+  const [isPrinting, setIsPrinting] = useState(false);
 
   useEffect(() => {
     if (!isScanning) return;
@@ -55,61 +57,128 @@ const TicketScanner = () => {
   const handleRescan = () => {
     setScanResult(null);
     setIsScanning(true);
+    setPrintStatus("");
   };
 
   const printTicketViaESCPOS = async (ticketData: TicketData) => {
+    if (isPrinting) return;
+    
     try {
-      const port = await (navigator as any).serial.requestPort();
-      await port.open({ baudRate: 9600 });
+      setIsPrinting(true);
+      setPrintStatus("Connecting to printer...");
+      
+      // Get all available ports
+      const ports = await (navigator as any).serial.getPorts();
 
+      // Try to get the previously saved port from localStorage
+      let port: any = null;
+      const savedPortInfo = JSON.parse(localStorage.getItem('savedSerialPort') || 'null');
+
+      // If we have saved port info, try to find a matching port
+      if (savedPortInfo) {
+        for (const availablePort of ports) {
+          const info = await availablePort.getInfo();
+          if (
+            info.usbVendorId === savedPortInfo.usbVendorId &&
+            info.usbProductId === savedPortInfo.usbProductId
+          ) {
+            port = availablePort;
+            setPrintStatus("Found previously used printer. Connecting...");
+            break;
+          }
+        }
+      }
+
+      // If no matching port found, ask user to select one
+      if (!port) {
+        try {
+          setPrintStatus("Please select your printer port...");
+          port = await (navigator as any).serial.requestPort();
+          const info = await port.getInfo();
+
+          // Save the selected port info for future use
+          localStorage.setItem('savedSerialPort', JSON.stringify({
+            usbVendorId: info.usbVendorId,
+            usbProductId: info.usbProductId
+          }));
+        } catch (e) {
+          setPrintStatus("Port selection was cancelled.");
+          setIsPrinting(false);
+          return;
+        }
+      }
+      
+      // Open the port with appropriate settings
+      setPrintStatus("Opening connection to printer...");
+      await port.open({ baudRate: 9600 });
+      setPrintStatus("Connected to printer. Preparing to send data...");
+
+      // Get a writer for the port
       const writer = port.writable.getWriter();
       const encoder = new TextEncoder();
 
+      // ESC/POS commands
       const ESC = '\x1B';
       const GS = '\x1D';
 
+      // Format date for the ticket
       const dateStr = new Date(ticketData.date).toLocaleDateString('en-US', {
         weekday: 'short',
         day: '2-digit',
         month: 'short',
       });
 
+      
+      // Prepare print commands
       const commands = [
-        ESC + '@', // Init
-        ESC + 'a' + '\x01', // Center
-        ESC + 'E' + '\x01', // Bold
+        ESC + '@',                // Initialize printer
+        ESC + 'a' + '\x01',       // Center alignment
+        ESC + 'E' + '\x01',       // Bold on
         'Premiere Tix\n',
-        ESC + 'E' + '\x00',
-        '(Solo Paragon)\n',
-        ESC + 'a' + '\x00', // Left align
-        ESC + 'E' + '\x01',
+        ESC + 'E' + '\x00',       // Bold off
+        `${ticketData.cinema}\n`,
+        ESC + 'a' + '\x00',       // Left alignment
+        ESC + 'E' + '\x01',       // Bold on
         `Film   : ${ticketData.film}\n`,
-        ESC + '!' + '\x00', // Normal
-        ESC + 'E' + '\x00',
+        ESC + '!' + '\x00',       // Normal text
+        ESC + 'E' + '\x00',       // Bold off
         `Date   : ${dateStr}\n`,
         `Time   : ${ticketData.time}\n`,
         `Seat   : ${ticketData.seats}\n`,
         `Studio : ${ticketData.studio}\n`,
-        ESC + 'E' + '\x01',
+        ESC + 'E' + '\x01',       // Bold on
         `Price  : Rp. ${new Intl.NumberFormat('id-ID').format(Number(ticketData.price))}\n`,
-        ESC + 'E' + '\x00',
+        ESC + 'E' + '\x00',       // Bold off
         '\n',
-        ESC + 'a' + '\x01',
+        ESC + 'a' + '\x01',       // Center alignment
         'Thank you for your purchase,\n',
         'enjoy!\n',
-        '\n\n',
-        GS + 'V' + '\x00' // Cut
+        '\n\n\n',                 // Extra line feeds for better paper cutting
+        GS + 'V' + '\x00'         // Cut paper
       ];
 
-      for (const cmd of commands) {
-        await writer.write(encoder.encode(cmd));
-      }
+      // Send commands with delay between each to ensure proper transmission
+      setPrintStatus("Sending data to printer...");
+      
+      // Send all commands as a single buffer for better reliability
+      const fullCommandBuffer = encoder.encode(commands.join(''));
+      await writer.write(fullCommandBuffer);
+      
+      // Ensure data is fully transmitted
 
+      setPrintStatus("Data sent. Finalizing print job...");
+      
+      // Close properly
       writer.releaseLock();
+      await new Promise(resolve => setTimeout(resolve, 1000)); // Wait a bit before closing
       await port.close();
+      
+      setPrintStatus("Ticket printed successfully!");
     } catch (err) {
-      alert('Gagal mengirim ke printer melalui COM port.');
       console.error('Printer Error:', err);
+      setPrintStatus(`Print error: ${(err as Error).message || "Unknown error"}`);
+    } finally {
+      setIsPrinting(false);
     }
   };
 
@@ -206,10 +275,23 @@ const TicketScanner = () => {
                     </div>
                   </div>
 
+                  {printStatus && (
+                    <div className={`mt-4 p-3 rounded-md ${
+                      printStatus.includes("success") 
+                        ? "bg-green-50 text-green-700" 
+                        : printStatus.includes("error") || printStatus.includes("cancelled")
+                          ? "bg-red-50 text-red-700"
+                          : "bg-blue-50 text-blue-700"
+                    }`}>
+                      {printStatus}
+                    </div>
+                  )}
+
                   <div className="flex justify-end space-x-4 pt-4">
                     <button
                       onClick={handleRescan}
                       className="px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50 transition-colors"
+                      disabled={isPrinting}
                     >
                       Scan Another Ticket
                     </button>
@@ -219,9 +301,14 @@ const TicketScanner = () => {
                           printTicketViaESCPOS(scanResult);
                         }
                       }}
-                      className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors"
+                      className={`px-4 py-2 ${
+                        isPrinting 
+                          ? "bg-gray-400 cursor-not-allowed" 
+                          : "bg-blue-600 hover:bg-blue-700"
+                      } text-white rounded-md transition-colors`}
+                      disabled={isPrinting}
                     >
-                      Print Ticket via COM
+                      {isPrinting ? "Printing..." : "Print Ticket"}
                     </button>
                   </div>
                 </div>
